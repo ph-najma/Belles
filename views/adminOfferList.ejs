@@ -1,0 +1,137 @@
+<%- include('adminHeader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div style="padding: 100px">
+  <a href="/createOffer"
+    ><button class="btn mb-3 float-right" style="margin-left: 10px">
+      Add Offer
+    </button></a
+  >
+  <a href="/categoryOfferCreate"
+    ><button class="btn mb-3 float-right">Add Category Offer</button></a
+  >
+  <h3>Coupon Lists</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Offer Name</th>
+        <th scope="col">Offer Percentage</th>
+        <th scope="col">Offer Valid Product</th>
+        <th scope="col">OFFER VALID CATEGORY</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(function(x,i) { %>
+      <tr>
+        <td style="width: 10px"><%= i+1 %></td>
+        <td><%= x.name %></td>
+        <td><%= x.percentage %></td>
+        <td><%= x.product ? x.product.name : 'N/A' %></td>
+        <td><%= x.category ? x.category.name : 'N/A' %></td>
+        <td>
+          <%if(x.product){%>
+          <button class="btn" onclick="confirmDelete('<%=x._id%>')">
+            Delete
+          </button>
+          <%}else if(x.category){%>
+          <button class="btn" onclick="confirmDeleteCategory('<%=x._id%>')">
+            Delete
+          </button>
+          <%}%>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<script>
+  function confirmDelete(offerId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make an AJAX request to the delete route
+        fetch(`/deleteOffer/${offerId}`, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire("Deleted!", "Offer has been deleted.", "success").then(
+                () => {
+                  // Optionally, reload the page or remove the deleted row from the table
+                  window.location.href = "/offerList";
+                }
+              );
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the Offer.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the Offer.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+  function confirmDeleteCategory(offerId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make an AJAX request to the delete route
+        fetch(`/deleteCategoryOffer/${offerId}`, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire("Deleted!", "Offer has been deleted.", "success").then(
+                () => {
+                  // Optionally, reload the page or remove the deleted row from the table
+                  window.location.href = "/offerList";
+                }
+              );
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the Offer.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the Offer.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+</script>
+
+<%- include('adminFooter') %>

@@ -1,0 +1,31 @@
+<%- include('adminHeader') %>
+<div style="padding: 100px">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Sname</th>
+        <th scope="col">Email</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (users.length > 0) { %> <% for (let i = 0; i < users.length; i++) {
+      %>
+      <tr>
+        <th scope="row"><%= i + 1 %></th>
+        <td><%= users[i].name %></td>
+        <td><%= users[i].sname %></td>
+        <td><%= users[i].email %></td>
+        <% if (users[i].is_blocked) { %>
+        <td><a href="/unblockUser?id=<%= users[i]._id %>">Unblock</a></td>
+        <% } else { %>
+        <td><a href="/blockUser?id=<%= users[i]._id %>">Block</a></td>
+        <% } %>
+      </tr>
+      <% } %> <% } %>
+    </tbody>
+  </table>
+</div>
+<%- include('adminFooter') %>

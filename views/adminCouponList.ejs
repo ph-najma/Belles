@@ -1,0 +1,84 @@
+<%- include('adminHeader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div style="padding: 100px">
+  <a href="/createCoupon"
+    ><button class="btn mb-3 float-right">Add Coupon</button></a
+  >
+  <h3>Coupon Lists</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Coupon Code</th>
+        <th scope="col">Coupon Discount</th>
+        <th scope="col">Expiry Date</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (data.length > 0) { %> <% for (let i = 0; i < data.length; i++) { %>
+      <tr>
+        <th scope="row"><%= i + 1 %></th>
+
+        <td><%= data[i].code %></td>
+        <td><%= data[i].percentage %></td>
+
+        <td><%= data[i].expiryDate %></td>
+
+        <td>
+          <button class="btn" onclick="confirmDelete('<%=data[i]._id%>')">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <% } %> <% } %>
+    </tbody>
+  </table>
+</div>
+<script>
+  function confirmDelete(couponId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make an AJAX request to the delete route
+        fetch(`/couponDelete/${couponId}`, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire("Deleted!", "Coupon has been deleted.", "success").then(
+                () => {
+                  // Optionally, reload the page or remove the deleted row from the table
+                  window.location.href = "/couponList";
+                }
+              );
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the Coupon.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the Coupon.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+</script>
+
+<%- include('adminFooter') %>

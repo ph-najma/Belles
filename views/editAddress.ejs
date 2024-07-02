@@ -1,0 +1,73 @@
+<%-include('userHeader')%>
+<!--End Mobile Menu-->
+<div class="form-data">
+  <div class="form-container">
+    <form
+      method="post"
+      id="addAddressForm"
+      action="/editAddress?_id=<%=address._id%>"
+    >
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input
+          class="form-control"
+          type="Number"
+          placeholder="Phone number"
+          name="phone"
+          value="<%=address.phone%>"
+        />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Address"
+          name="address"
+          value="<%=address.address%>"
+        />
+      </div>
+      <div class="form-group">
+        <label>Post code</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Post code"
+          name="postcode"
+          value="<%=address.postcode%>"
+        />
+      </div>
+      <div class="form-group">
+        <label>Select Country</label>
+        <select
+          class="form-control"
+          name="country"
+          value="<%=address.country%>"
+        >
+          <option>India</option>
+          <option>UAE</option>
+          <option>SAUDI ARABIA</option>
+          <option>Armenia</option>
+          <option>Argentina</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select State</label>
+        <select class="form-control" name="state" value="<%=address.state%>">
+          <option>Kerala</option>
+          <option>Tamil Nadu</option>
+          <option>Sri Lanka</option>
+          <option>Utharpredsh</option>
+          <option>Utharakhand</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+
+<!--End Body Content-->
+
+<%-include('userFooter')%>
+<!--End Quick View popup-->

@@ -1,0 +1,464 @@
+<%- include('adminHeader') %>
+    
+    <div class="container-fluid pt-4 px-4">
+      <!-- First Row: Filter Section -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="bg-light rounded p-4">
+            <!-- Date Range Picker -->
+            <div class="filter-section">
+              <div class="row mb-3">
+                <div class="col-12">
+                  <input
+                    type="date"
+                    id="startDate"
+                    class="form-control"
+                    value="2023-01-01"
+                    placeholder="Start Date"
+                  />
+                </div>
+                <div class="col-12 mt-3">
+                  <input
+                    type="date"
+                    id="endDate"
+                    class="form-control"
+                    value="2024-06-30"
+                    placeholder="End Date"
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <button class="btn btn-primary w-100" onclick="applyFilters('custom')">Apply</button>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-3">
+                  <button class="btn btn-outline-secondary w-100" onclick="applyFilters('daily')">Daily</button>
+                </div>
+                <div class="col-3">
+                  <button class="btn btn-outline-secondary w-100" onclick="applyFilters('weekly')">Weekly</button>
+                </div>
+                <div class="col-3">
+                  <button class="btn btn-outline-secondary w-100" onclick="applyFilters('monthly')">Monthly</button>
+                </div>
+                <div class="col-3">
+                  <button class="btn btn-outline-secondary w-100" onclick="applyFilters('yearly')">Yearly</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Second Row: Best Selling Products, Categories, Brands -->
+      <div class="row mb-4">
+        <!-- Best Selling Products -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Best Selling Products</h5>
+              <ul class="list-group">
+                <% bestSellingProducts.forEach(product => { %>
+                <li class="list-group-item"><%= product.productName %> - <%= product.totalQuantity %> sold</li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- Best Selling Categories -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Best Selling Categories</h5>
+              <ul class="list-group">
+                <% bestSellingCategories.forEach(category => { %>
+                <li class="list-group-item"><%= category.categoryName %> - <%= category.totalQuantity %> sold</li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- Best Selling Brands -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Best Selling Brands</h5>
+              <ul class="list-group">
+                <% bestSellingBrands.forEach(brand => { %>
+                <li class="list-group-item"><%= brand._id %> - <%= brand.totalQuantity %> sold</li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Third Row: Dashboard Cards -->
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-line fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2">Users</p>
+              <h6 class="mb-0" id="totalUsers"><%= data.length %></h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-bar fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2">Total Earnings</p>
+              <h6 class="mb-0" id="totalEarnings"><%= totalPriceSum[0].totalPriceSum %></h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-area fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2" style="font-size: smaller">Weekly Earnings</p>
+              <% if (weeklyEarnings && weeklyEarnings.length > 0 && weeklyEarnings[0] && weeklyEarnings[0].totalPriceSum) { %>
+              <h6 class="mb-0">₹ <%= weeklyEarnings[0].totalPriceSum %></h6>
+              <% } else { %>
+              <h6 class="mb-0">₹ 0</h6>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-pie fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2">Total Orders</p>
+              <h6 class="mb-0" id="totalOrders"><%= orderNumber.length %></h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-pie fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2">Total Discount</p>
+              <h6 class="mb-0" id="totalDiscount"><%= totalDiscount %></h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="bg-light rounded d-flex align-items-center  p-4">
+            <i class="fa fa-chart-pie fa-3x text-primary"></i>
+            <div class="ms-3">
+              <p class="mb-2">Total Coupon Deduction</p>
+              <h6 class="mb-0" id="totalCouponDeduction"><%= totalCouponDeduction %></h6>
+            </div>
+            <%console.log(totalDiscount)%>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+      </div>
+    </div>
+
+    <!-- Sale & Revenue End -->
+    <br /><br />
+
+    <script>
+      async function updateDashboard(startDate, endDate) {
+  // Fetch updated data based on the date range
+  const response = await fetch('/updateDashboard', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ startDate, endDate }),
+  });
+
+  const data = await response.json();
+
+  // Update the dashboard elements
+  document.getElementById('totalUsers').textContent = data.totalUsers;
+  document.getElementById('totalEarnings').textContent = data.totalEarnings;
+  document.getElementById('totalOrders').textContent = data.totalOrders;
+  document.getElementById('totalDiscount').textContent = data.totalDiscount;
+  document.getElementById('totalCouponDeduction').textContent = data.totalCouponDeduction;
+}
+
+      applyFilters();
+      function applyFilters(filterType) {
+        let startDate, endDate;
+         if (filterType === "daily") {
+          startDate = moment().format("YYYY-MM-DD");
+          endDate = moment().format("YYYY-MM-DD");
+        }
+        
+        else if (filterType === "weekly") {
+          startDate = moment().startOf("isoWeek").format("YYYY-MM-DD");
+          endDate = moment().endOf("isoWeek").format("YYYY-MM-DD");
+        } else if (filterType === "monthly") {
+          startDate = moment().startOf("month").format("YYYY-MM-DD");
+          endDate = moment().endOf("month").format("YYYY-MM-DD");
+        } else if (filterType === "yearly") {
+          startDate = moment().startOf("year").format("YYYY-MM-DD");
+          endDate = moment().endOf("year").format("YYYY-MM-DD");
+        } else {
+          // Default to custom date range
+          startDate = document.getElementById("startDate").value;
+          endDate = document.getElementById("endDate").value;
+        }
+
+        // Set values in date inputs if not custom
+        if (filterType !== "custom") {
+          document.getElementById("startDate").value = startDate;
+          document.getElementById("endDate").value = endDate;
+        }
+
+        // Call fetch functions with selected dates
+        getlineChartData(startDate, endDate);
+        getbarChartData(startDate, endDate);
+        getpieChartData(startDate, endDate);
+        updateDashboard(startDate, endDate);
+      }
+
+      async function getlineChartData(startDate, endDate) {
+        await fetch("/lineChart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ startDate, endDate }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            const count = res.result.map((item) => item.count);
+            const date = res.result.map((item) => item._id);
+            orderlineChart(date, count);
+          });
+      }
+      async function getbarChartData(startDate, endDate) {
+        await fetch("/barChart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ startDate, endDate }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            const totalPrice = res.result.map((item) => item.totalPrice);
+            const date = res.result.map((item) => item._id);
+            orderbarChart(date, totalPrice);
+          });
+      }
+      async function getpieChartData(startDate, endDate) {
+        await fetch("/pieChart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ startDate, endDate }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            const count = res.result.map((item) => item.count);
+            const paymentType = res.result.map((item) => item._id);
+            orderpieChart(count, paymentType);
+          });
+      }
+    </script>
+
+    <div class="row m-3">
+      <div
+        class="col-lg-8 col-md-12 d-flex align-items-center justify-content-center"
+      >
+        <canvas id="myChart"></canvas>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+      <script>
+        let myChart;
+        const ctx = document.getElementById("myChart");
+        function orderlineChart(date, count) {
+          if (myChart) {
+            myChart.destroy(); // Destroy existing chart instance if it exists
+          }
+          myChart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: date,
+              datasets: [
+                {
+                  label: "Orders",
+                  data: count,
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          });
+        }
+      </script>
+      <br /><br />
+      <div
+        class="col-lg-4 col-md-12 d-flex align-items-center justify-content-center"
+      >
+        <canvas id="myChart2"></canvas>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      let myChart2;
+      const ctxxx = document.getElementById("myChart2");
+      function orderpieChart(count, paymentType) {
+        if (myChart2) {
+          myChart2.destroy(); // Destroy existing chart instance if it exists
+        }
+        myChart2 = new Chart(ctxxx, {
+          type: "pie",
+          data: {
+            labels: paymentType,
+            datasets: [
+              {
+                label: "Payment Method",
+                data: count,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+    </script>
+
+    <br /><br />
+    <div class="row m-3">
+      <div
+        class="col-lg-8 col-md-12 d-flex align-items-center justify-content-center"
+      >
+        <canvas id="myChart1"></canvas>
+      </div>
+      <div class="col-lg-4 col-md-12">
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Daily Sales Report</p>
+          <a href="/dailySales"><i class="fa-solid fa-download"></i></a>
+        </div>
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Weekly Sales Report</p>
+          <a href="/weeklySales"><i class="fa-solid fa-download"></i></a>
+        </div>
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Yearly Sales Report</p>
+          <a href="/yearlySales"><i class="fa-solid fa-download"></i></a>
+        </div>
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Daily Sales Report (Excel)</p>
+          <a href="/dailySales?fileType=excel"
+            ><i class="fa-solid fa-download"></i
+          ></a>
+        </div>
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Weekly Sales Report (Excel)</p>
+          <a href="/weeklySales?fileType=excel"
+            ><i class="fa-solid fa-download"></i
+          ></a>
+        </div>
+        <div class="downloadPdf bg-light d-flex align-items-center">
+          <p>Yearly Sales Report (Excel)</p>
+          <a href="/yearlySales?fileType=excel"
+            ><i class="fa-solid fa-download"></i
+          ></a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      let myChart1;
+      const ctxx = document.getElementById("myChart1");
+      function orderbarChart(date, totalPrice) {
+        if (myChart1) {
+          myChart1.destroy(); // Destroy existing chart instance if it exists
+        }
+        myChart1 = new Chart(ctxx, {
+          type: "bar",
+          data: {
+            labels: date,
+            datasets: [
+              {
+                label: `Earnings`,
+                data: totalPrice,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+    </script>
+    <br /><br />
+
+    <!-- Sales Chart End -->
+
+    <!-- Recent Sales Start -->
+
+    <!-- Recent Sales End -->
+
+    <!-- Widgets Start -->
+
+    <!-- Widgets End -->
+
+    <!-- Footer Start -->
+
+    <!-- Footer End -->
+
+    <!-- Content End -->
+
+    <script>
+      let sidebar = document.querySelector(".sidebar");
+      let closeBtn = document.querySelector("#btn");
+      let searchBtn = document.querySelector(".bx-search");
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+        menuBtnChange(); //calling the function(optional)
+      });
+      searchBtn.addEventListener("click", () => {
+        // Sidebar open when you click on the search iocn
+        sidebar.classList.toggle("open");
+        menuBtnChange(); //calling the function(optional)
+      });
+      // following are the code to change sidebar button(optional)
+      function menuBtnChange() {
+        if (sidebar.classList.contains("open")) {
+          closeBtn.classList.replace("bx-menu", "bx-menu-alt-right"); //replacing the iocns class
+        } else {
+          closeBtn.classList.replace("bx-menu-alt-right", "bx-menu"); //replacing the iocns class
+        }
+      }
+    </script>
+    <%- include('adminFooter') %>
+  </body>
+</html>

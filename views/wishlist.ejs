@@ -1,0 +1,194 @@
+<%-include("userHeader")%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<style>
+  .size-options {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .size-options .swatch-element {
+    margin-right: 10px; /* Adjust the spacing as needed */
+  }
+</style>
+<div id="page-content">
+  <!--Page Title-->
+  <div class="page section-header text-center">
+    <div class="page-title">
+      <div class="wrapper"><h1 class="page-width">Wishlist</h1></div>
+    </div>
+  </div>
+  <!--End Page Title-->
+</div>
+
+<div style="padding: 60px">
+  <% if (items.length === 0) { %>
+  <div class="text-center">
+    <p>Your wishlist is empty.</p>
+  </div>
+  <% } else { %>
+  <table class="table table-hover">
+    <thead></thead>
+    <tbody>
+      <form
+        id="addCartForm"
+        class="product-form product-form-product-template hidedropdown"
+      >
+        <% items.forEach(item => { %>
+        <tr>
+          <td>
+            <a href="/productDetail?_id=<%= item.product._id %>">
+              <img
+                src="<%= item.product.images[0] %>"
+                alt="<%= item.product.name %>"
+                style="max-width: 100px; max-height: 100px"
+              />
+            </a>
+          </td>
+          <td>
+            <%= item.product.name %><br /><br />$<%= item.product.price %><br /><br />
+            <div class="product-form__item">
+              <label class="header">Size:</label>
+              <div class="size-options">
+                <% Object.keys(item.product.sizes).forEach(size => { %> <% if
+                (item.product.sizes[size] > 0) { %>
+                <div class="swatch-element <%= size %> available">
+                  <input
+                    class="swatchInput"
+                    id="swatch-1-<%= size %>"
+                    type="radio"
+                    name="size-<%= item.product._id %>"
+                    value="<%= size %>"
+                    required
+                  />
+                  <label
+                    class="swatchLbl small rounded"
+                    for="swatch-1-<%= size %>"
+                    title="<%= size %>"
+                    ><%= size %></label
+                  >
+                </div>
+                <% } %> <% }); %>
+              </div>
+            </div>
+            <div class="product-review">
+              <i class="font-13 fa fa-star"></i>
+              <i class="font-13 fa fa-star"></i>
+              <i class="font-13 fa fa-star"></i>
+              <i class="font-13 fa fa-star-o"></i>
+              <i class="font-13 fa fa-star-o"></i>
+            </div>
+          </td>
+          <td>
+            <div class="product-form__item--submit">
+              <button
+                id="addToCartButton-<%=item.product._id%>"
+                class="btn product-form__cart-submit"
+                data-product-id="<%= item.product._id %>"
+              >
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </td>
+          <td>
+            <button onclick="removeWishlistItem('<%=item.product._id %>')">
+              <i class="icon icon anm anm-times-l"></i>
+            </button>
+          </td>
+        </tr>
+        <% }) %>
+      </form>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<script>
+  document.querySelectorAll(".product-form__cart-submit").forEach((button) => {
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+      const productId = this.getAttribute("data-product-id");
+      const selectedSizeRadio = document.querySelector(
+        `input[name="size-${productId}"]:checked`
+      );
+      const selectedSize = selectedSizeRadio ? selectedSizeRadio.value : null;
+
+      if (!selectedSize) {
+        console.error("Please select a size!");
+        return;
+      }
+
+      fetch(`/addtocart/${productId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ size: selectedSize }),
+      })
+        .then((response) => {
+          // If the request was successful, show the success message
+          window.location.href = "/cart";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    });
+  });
+</script>
+
+<script>
+  async function removeWishlistItem(itemId) {
+    // Show confirmation dialog using SweetAlert
+    const confirmed = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will remove this item from your wishlist.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove it!",
+    });
+
+    // If user confirms removal
+    if (confirmed.isConfirmed) {
+      try {
+        const response = await fetch("/removeWishlistItem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemId: itemId }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Show success message with SweetAlert
+          await Swal.fire({
+            title: "Removed!",
+            text: "Item has been removed from your wishlist.",
+            icon: "success",
+          });
+          // Redirect to wishlist page
+          window.location.href = "/wishlist";
+        } else {
+          // Show error message with SweetAlert
+          await Swal.fire({
+            title: "Failed!",
+            text: result.message || "Failed to remove item from wishlist.",
+            icon: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error removing item from wishlist:", error);
+        // Show error message with SweetAlert
+        await Swal.fire({
+          title: "Error!",
+          text: "An error occurred while removing the item.",
+          icon: "error",
+        });
+      }
+    }
+  }
+</script>
+
+<!--End Body Content-->
+<%-include("userFooter")%>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Invoice</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .header,
+      .footer,
+      .logo {
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+      }
+      .customer-info,
+      .order-info {
+        margin-bottom: 20px;
+      }
+      .order-items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      .order-items th,
+      .order-items td {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      .order-items th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">Belle</div>
+    <div class="header">
+      <h1>Invoice</h1>
+
+      <p>Date: <%= order.orderDate.toDateString() %></p>
+    </div>
+    <div class="customer-info">
+      <h2>Customer Information</h2>
+      <p>Name: <%= order.userId.name %></p>
+      <p>Email: <%= order.userId.email %></p>
+      <p>
+        Address: <%= order.address.street %>, <%= order.address.city %>, <%=
+        order.address.state %> <%= order.address.zip %>
+      </p>
+    </div>
+    <div class="order-info">
+      <h2>Order Information</h2>
+      <table class="order-items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% order.item.forEach(item => { %>
+          <tr>
+            <td><%= item.product.name %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.price.toFixed(2) %></td>
+            <td><%= (item.quantity * item.price).toFixed(2) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% if (order.discountPercentage>0) { %>
+      <p>Discount (%): <%= order.discountPercentage.toFixed(2) %> %</p>
+      <p>
+        Discount Amount: <%= ((order.totalPrice * order.discountPercentage) /
+        100).toFixed(2) %>
+      </p>
+      <% } else { %>
+      <p>Discount (%): 0.00 %</p>
+      <p>Discount Amount: 0.00</p>
+      <% } %>
+      <p>Total Price: <%= order.totalPrice.toFixed(2) %></p>
+    </div>
+    <div class="footer">
+      <p>Thank you for your purchase!</p>
+    </div>
+  </body>
+</html>

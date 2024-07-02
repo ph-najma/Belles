@@ -1,0 +1,173 @@
+<%-include("userHeader")%>
+<style>
+  .home-section {
+    position: relative;
+    background: #fff;
+    min-height: 100vh;
+    top: 0;
+    left: 78px;
+    width: calc(100% - 78px);
+    transition: all 0.5s ease;
+    z-index: 2;
+  }
+
+  .home-section .text {
+    display: inline-block;
+    color: #000000;
+    font-size: 25px;
+    font-weight: 500;
+    margin: 18px;
+  }
+  .personal-info {
+    padding-left: 20px;
+    justify-content: center;
+    padding-top: 80px;
+  }
+  .personal-info input[type="text"] {
+    width: 300px;
+    height: 40px;
+  }
+</style>
+<div class="main-container">
+  <section class="home-section">
+    <div class="personal-info">
+      <h2>Personal Information</h2>
+      <div class="row">
+        <div class="col">
+          <input
+            type="text"
+            name="name"
+            id="nameInput"
+            placeholder="First Name"
+            value="<%=user.name%>"
+          />
+          <button class="btn" onclick="editName()">Edit</button>
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col">
+          <input
+            type="text"
+            name="sname"
+            placeholder="Last Name"
+            id="snameInput"
+            value="<%=user.sname%>"
+          />
+          <button class="btn" onclick="editsName()">Edit</button>
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col-2">
+          <label><h3>Email</h3></label>
+          <input type="text" placeholder="Email" value="<%=user.email%>" />
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col-3">
+          <label><h3>Referral Code</h3></label>
+          <input
+            type="text"
+            placeholder="Referral Code"
+            value="<%=user.referralcode%>"
+          />
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col-3">
+          <label><h3>Referral Link</h3></label>
+          <input
+            type="text"
+            placeholder="Referral Link"
+            value="<%=user.referralLink%>"
+          />
+        </div>
+      </div>
+      <div class="row pt-4">
+        <div class="col-3">
+          <a href="/changePassword" class="btn"> change password</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<%-include("userFooter")%>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+  async function editName() {
+    console.log("hellooo");
+    const newName = document.getElementById("nameInput").value;
+
+    const response = await fetch("/editName", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: newName }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      Toastify({
+        text: "First name changed successfully",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "black",
+        stopOnFocus: true,
+      }).showToast();
+      this.reset(); // Display success message
+    } else {
+      Toastify({
+        text: "Error adding name",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "black",
+        stopOnFocus: true,
+      }).showToast(); // Display error message
+    }
+  }
+</script>
+<script>
+  async function editsName() {
+    console.log("hellooo");
+    const newName = document.getElementById("snameInput").value;
+
+    const response = await fetch("/editSname", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sname: newName }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      Toastify({
+        text: "second name changed successfully",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "black",
+        stopOnFocus: true,
+      }).showToast();
+      this.reset(); // Display success message
+    } else {
+      Toastify({
+        text: "Error editing",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "black",
+        stopOnFocus: true,
+      }).showToast(); // Display error message
+    }
+  }
+</script>

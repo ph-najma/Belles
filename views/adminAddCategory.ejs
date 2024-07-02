@@ -1,0 +1,84 @@
+<%- include('adminHeader') %>
+<link
+  href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  rel="stylesheet"
+/>
+<div class="formdiv">
+  <div class="form-container">
+    <form id="addCategoryForm" action="/addCategory" method="POST">
+      <div class="form-group">
+        <label>Category Name</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="New Category"
+          name="name"
+          id="name"
+          oninput="validateCategoryName()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="nameError"
+        ></span>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+<script src="../validations/categoryValidation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+  document
+    .getElementById("addCategoryForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent default form submission behavior
+
+      const formData = {
+        name: document.getElementById("name").value,
+      };
+
+      try {
+        const response = await fetch(this.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          const responseData = await response.json(); // Parse response data
+          if (responseData.success) {
+            // Display success message
+            window.location.href = "/categoryManagement";
+          } else {
+            // Display error message
+            Toastify({
+              text: " Category already exists",
+              duration: 3000,
+              close: true,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "black",
+              stopOnFocus: true,
+            }).showToast();
+          }
+        } else {
+          // Display error message
+          Toastify({
+            text: "Error adding Category",
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "black",
+            stopOnFocus: true,
+          }).showToast();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    });
+</script>
+<%- include('adminFooter') %>

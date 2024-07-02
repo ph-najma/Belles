@@ -1,0 +1,22 @@
+<%- include('adminHeader') %>
+
+<div class="form-container">
+  <form id="addCategoryForm" action="/changeStatus" method="POST">
+    <div class="form-group">
+      <input type="hidden" name="orderId" value="<%= orderId %>" />
+      <input type="hidden" name="itemIndex" value="<%= itemIndex %>" />
+      <label for="status">Change Status</label>
+      <select class="form-control" name="status" id="status" required>
+        <option value="" disabled selected>Select</option>
+        <option value="Placed">Placed</option>
+        <option value="Pending">Pending</option>
+        <option value="Cancelled">Cancelled</option>
+        <option value="return_requested">Return Requested</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+<%- include('adminFooter') %>

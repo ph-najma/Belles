@@ -1,0 +1,125 @@
+<%-include("userHeader")%>
+<section class="h-100 gradient-custom">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-lg-10 col-xl-8">
+        <div class="card" style="border-radius: 10px">
+          <div class="card-header px-4 py-5" style="background-color: #e74c3c">
+            <h5 class="text-white mb-0">Order Failed</h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <p class="lead fw-normal mb-0" style="color: #27a8b2">
+                We're sorry, but we couldn't process your order.
+              </p>
+            </div>
+            <div class="alert alert-danger" role="alert">
+              Unfortunately, there was an issue processing your order. Please
+              try again or contact our support team for assistance.
+            </div>
+            <div class="card shadow-0 border mb-4">
+              <div class="card-body">
+                <% orderdata.item.forEach(function(item) { %>
+                <div class="row">
+                  <div class="col-md-2">
+                    <img
+                      src="<%= item.product.images[0] %>"
+                      class="img-fluid"
+                      alt="<%= item.product.name %>"
+                    />
+                  </div>
+
+                  <div
+                    class="col-md-2 text-center d-flex justify-content-center align-items-center"
+                  >
+                    <p class="text-muted mb-0"><%= item.product.name %></p>
+                  </div>
+                  <div
+                    class="col-md-2 text-center d-flex justify-content-center align-items-center"
+                  >
+                    <p class="text-muted mb-0 small"><%= item.size %></p>
+                  </div>
+                  <div
+                    class="col-md-2 text-center d-flex justify-content-center align-items-center"
+                  >
+                    <p class="text-muted mb-0 small">
+                      Price: <%= item.price %>
+                    </p>
+                  </div>
+                  <div
+                    class="col-md-2 text-center d-flex justify-content-center align-items-center"
+                  >
+                    <p class="text-muted mb-0 small">
+                      Qty: <%= item.quantity %>
+                    </p>
+                  </div>
+                </div>
+                <% }) %>
+                <hr
+                  class="mb-4"
+                  style="background-color: #e0e0e0; opacity: 1"
+                />
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between pt-2">
+              <p class="fw-bold mb-0">Order Details</p>
+              <p class="text-muted mb-0">
+                <span class="fw-bold me-4">Total</span>
+                $<%=orderdata.totalPrice%>
+              </p>
+            </div>
+            <%console.log(orderdata._id)%>
+
+            <div class="d-flex justify-content-between pt-2">
+              <p class="text-muted mb-0">Invoice Number : 788152</p>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <p class="text-muted mb-0">Invoice Date : 22 Dec,2019</p>
+              <p class="text-muted mb-0">
+                <span class="fw-bold me-4">GST 18%</span> 123
+              </p>
+            </div>
+
+            <div class="d-flex justify-content-between mb-5">
+              <p class="text-muted mb-0">Recepits Voucher : 18KU-62IIK</p>
+              <p class="text-muted mb-0">
+                <span class="fw-bold me-4">Delivery Charges</span> Free
+              </p>
+            </div>
+          </div>
+          <div
+            class="card-footer border-0 px-4 py-5"
+            style="
+              background-color: #e74c3c;
+              border-bottom-left-radius: 10px;
+              border-bottom-right-radius: 10px;
+            "
+          >
+            <h5
+              class="d-flex align-items-center justify-content-end text-white text-uppercase mb-0"
+            >
+              Total:
+              <span class="h2 mb-0 ms-2">$<%=orderdata.totalPrice%></span>
+            </h5>
+          </div>
+          <div class="d-flex justify-content-end mb-5">
+            <button id="retry-purchase" class="btn btn-primary">
+              Retry Purchase
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  console.log("Order ID:", "<%= orderdata._id %>");
+  document
+    .getElementById("retry-purchase")
+    .addEventListener("click", function () {
+      window.location.href = `/showOrders`;
+    });
+</script>
+<%-include("userFooter")%>

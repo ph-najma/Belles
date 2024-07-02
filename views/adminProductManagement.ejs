@@ -1,0 +1,104 @@
+<%- include('adminHeader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div style="padding: 100px">
+  <a href="/addProduct"
+    ><button class="btn mb-3 float-right">Add Product</button></a
+  >
+  <h3>Product Lists</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Image</th>
+        <th scope="col">Product name</th>
+        <th scope="col">Category</th>
+        <th scope="col">Stock</th>
+        <th scope="col">Price</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (products.length > 0) { %> <% for (let i = 0; i < products.length;
+      i++) { %>
+      <tr>
+        <th scope="row"><%= i + 1 %></th>
+        <td>
+          <img
+            src="<%= products[i].images[0] %>"
+            alt="Product Image"
+            style="max-width: 100px"
+          />
+        </td>
+        <td><%= products[i].name %></td>
+        <td><%= products[i].category.name %></td>
+        <td>
+          <% if (products[i].sizes) { %>
+          <ul>
+            <% for (const [key, value] of Object.entries(products[i].sizes)) {
+            %>
+            <li><%= key %>: <%= value %></li>
+            <% } %>
+          </ul>
+          <% } else { %> Out of Stock <% } %>
+        </td>
+        <td><%= products[i].price %></td>
+        <td><a href="/editProduct?_id=<%= products[i]._id %>">Edit</a></td>
+        <td>
+          <button class="btn" onclick="confirmDelete('<%= products[i]._id %>')">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <% } %> <% } %>
+    </tbody>
+  </table>
+</div>
+<script>
+  function confirmDelete(productId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make an AJAX request to the delete route
+        fetch(`/deleteProduct?_id=${productId}`, {
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire(
+                "Deleted!",
+                "Category has been deleted.",
+                "success"
+              ).then(() => {
+                // Optionally, reload the page or remove the deleted row from the table
+                window.location.href = "/productManagement";
+              });
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the category.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the category.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+</script>
+
+<%- include('adminFooter') %>

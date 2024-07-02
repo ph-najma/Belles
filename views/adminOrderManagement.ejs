@@ -1,0 +1,109 @@
+<%- include('adminHeader') %>
+
+<div style="padding: 100px">
+  <% Orders.forEach((order) => { %>
+  <div class="order-container mb-4 p-3 border rounded">
+    <h5>Order ID: <%= order._id %></h5>
+    <p>Order Date: <%= new Date(order.orderDate).toLocaleString() %></p>
+    <p>
+      User Name: <% if (order.userId && order.userId.name) { %> <%=
+      order.userId.name %> <% } %>
+    </p>
+
+    <div class="order-items">
+      <% order.item.forEach((item, itemIndex) => { %>
+      <div
+        class="item-container d-flex align-items-center justify-content-between mb-2"
+      >
+        <div class="d-flex align-items-center">
+          <div class="item-image me-3">
+            <img
+              src="<%= item.product.images[0] %>"
+              alt="Product Image"
+              style="width: 100px; height: auto"
+            />
+          </div>
+          <div class="item-details">
+            <p class="mb-1">
+              <strong>Product name:</strong> <%= item.product.name %>
+            </p>
+            <p class="mb-1">
+              <strong>Category:</strong> <%= item.product.category.name %>
+            </p>
+            <p class="mb-1"><strong>Status:</strong> <%= item.status %></p>
+          </div>
+        </div>
+        <div>
+          <% if (item.status === 'return_requested') { %>
+          <p>Product Returned</p>
+          <% } else { %>
+          <a
+            class="btn btn-primary"
+            href="/changestatus?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
+          >
+            Change Status
+          </a>
+          <% } %>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+    <button
+      class="btn btn-secondary mt-2"
+      onclick="showLedger('<%= order._id %>')"
+    >
+      Show Ledger
+    </button>
+
+    <!-- Container for ledger entries (initially hidden) -->
+    <div id="ledgerEntries_<%= order._id %>" style="display: none">
+      <h6>Ledger Entries:</h6>
+      <ul id="ledgerList_<%= order._id %>">
+        <!-- Ledger entries will be appended here dynamically -->
+      </ul>
+    </div>
+  </div>
+  <% }); %>
+</div>
+<script>
+  async function showLedger(orderId) {
+    try {
+      const response = await fetch(`/orders/${orderId}/ledger`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch ledger");
+      }
+
+      const order = await response.json();
+
+      const ledgerList = document.getElementById(`ledgerList_${orderId}`);
+      ledgerList.innerHTML = ""; // Clear existing entries
+
+      // Create separate list items for each piece of information
+      const li1 = document.createElement("li");
+      li1.textContent = `Payment Type: ${order.paymentType}`;
+      ledgerList.appendChild(li1);
+
+      const li2 = document.createElement("li");
+      li2.textContent = `Total Price: ${order.totalPrice}`;
+      ledgerList.appendChild(li2);
+
+      const li3 = document.createElement("li");
+      li3.textContent = `Order Date: ${new Date(
+        order.orderDate
+      ).toLocaleDateString()}`;
+      ledgerList.appendChild(li3);
+
+      const li4 = document.createElement("li");
+      li4.textContent = `Order Status: ${order.orderStatus}`;
+      ledgerList.appendChild(li4);
+
+      const ledgerContainer = document.getElementById(
+        `ledgerEntries_${orderId}`
+      );
+      ledgerContainer.style.display = "block";
+    } catch (error) {
+      console.error("Error in showLedger:", error);
+    }
+  }
+</script>
+<%- include('adminFooter') %>

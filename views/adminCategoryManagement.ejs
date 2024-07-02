@@ -1,0 +1,87 @@
+<%- include('adminHeader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div style="padding: 100px">
+  <div id="messageContainer"></div>
+  <a href="/addCategory"
+    ><button class="btn mb-3 float-right">Add Category</button></a
+  >
+  <h3>Category List</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Id</th>
+        <th scope="col">Name</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (Category.length > 0) { %> <% for (let i = 0; i < Category.length;
+      i++) { %>
+      <tr>
+        <th scope="row"><%= i + 1 %></th>
+        <td><%= Category[i]._id %></td>
+        <td><%= Category[i].name %></td>
+
+        <td><a href="/editCategory?_id=<%= Category[i]._id %>">Edit</a></td>
+        <td>
+          <button class="btn" onclick="confirmDelete('<%= Category[i]._id %>')">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <% } %> <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function confirmDelete(categoryId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make an AJAX request to the delete route
+        fetch(`/deleteCategory?_id=${categoryId}`, {
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire(
+                "Deleted!",
+                "Category has been deleted.",
+                "success"
+              ).then(() => {
+                // Optionally, reload the page or remove the deleted row from the table
+                window.location.href = "/categoryManagement";
+              });
+            } else {
+              Swal.fire(
+                "Error!",
+                "There was an error deleting the category.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              "Error!",
+              "There was an error deleting the category.",
+              "error"
+            );
+          });
+      }
+    });
+  }
+</script>
+
+<%- include('adminFooter') %>

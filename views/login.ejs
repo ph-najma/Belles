@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+  <!-- belle/login.html   11 Nov 2019 12:22:27 GMT -->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Account &ndash; Belle Multipurpose Bootstrap 4 Template</title>
+    <meta name="description" content="description" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="assets/images/favicon.png" />
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="assets/css/plugins.css" />
+    <!-- Bootstap CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/responsive.css" />
+  </head>
+  <body class="page-template belle">
+    <div class="pageWrapper">
+      <!--Search Form Drawer-->
+      <div class="search">
+        <div class="search__form">
+          <form class="search-bar__form" action="#">
+            <button class="go-btn search__button" type="submit">
+              <i class="icon anm anm-search-l"></i>
+            </button>
+            <input
+              class="search__input"
+              type="search"
+              name="q"
+              value=""
+              placeholder="Search entire store..."
+              aria-label="Search"
+              autocomplete="off"
+            />
+          </form>
+          <button type="button" class="search-trigger close-btn">
+            <i class="icon anm anm-times-l"></i>
+          </button>
+        </div>
+      </div>
+      <!--End Search Form Drawer-->
+      <!--Top Header-->
+      <div class="top-header">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-10 col-sm-8 col-md-5 col-lg-4"></div>
+            <div
+              class="col-sm-4 col-md-4 col-lg-4 d-none d-lg-none d-md-block d-lg-block"
+            >
+              <div class="text-center"></div>
+            </div>
+            <div class="col-2 col-sm-4 col-md-3 col-lg-4 text-right">
+              <span class="user-menu d-block d-lg-none"
+                ><i class="anm anm-user-al" aria-hidden="true"></i
+              ></span>
+              <ul class="customer-links list-inline">
+                <li><a href="/login">Login</a></li>
+                <li><a href="/signup">Create Account</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--End Top Header-->
+      <!--Header-->
+      <div class="header-wrap animated d-flex">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <!--Desktop Logo-->
+            <div class="logo col-md-2 col-lg-2 d-none d-lg-block">
+              <a href="index.html">
+                <img
+                  src="assets/images/logo.svg"
+                  alt="Belle Multipurpose Html Template"
+                  title="Belle Multipurpose Html Template"
+                />
+              </a>
+            </div>
+            <!--End Desktop Logo-->
+            <div class="col-2 col-sm-3 col-md-3 col-lg-8">
+              <!--Desktop Menu-->
+
+              <!--End Desktop Menu-->
+            </div>
+            <div
+              class="col-6 col-sm-6 col-md-6 col-lg-2 d-block d-lg-none mobile-logo"
+            >
+              <div class="logo">
+                <a href="index.html">
+                  <img
+                    src="assets/images/logo.svg"
+                    alt="Belle Multipurpose Html Template"
+                    title="Belle Multipurpose Html Template"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-content">
+        <!--Page Title-->
+        <div class="page section-header text-center">
+          <div class="page-title">
+            <div class="wrapper"><h1 class="page-width">Login</h1></div>
+          </div>
+        </div>
+        <!--End Page Title-->
+
+        <div class="container">
+          <div class="row">
+            <div
+              class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3"
+            >
+              <div class="mb-4">
+                <form
+                  method="post"
+                  action="/login"
+                  id="loginForm"
+                  accept-charset="UTF-8"
+                  class="contact-form"
+                >
+                  <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                      <div class="form-group">
+                        <label for="CustomerEmail">Email</label>
+                        <input
+                          type="email"
+                          name="email"
+                          id="email"
+                          oninput="validateEmail()"
+                        />
+                        <% if (emailError) { %>
+                        <span
+                          class="text-danger d-flex justify-content-center align-items-center"
+                          ><%= emailError %></span
+                        >
+                        <% } %>
+                        <span
+                          class="text-danger d-flex justify-content-center align-items-center"
+                          id="emailError"
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                      <div class="form-group">
+                        <label for="CustomerPassword">Password</label>
+                        <input
+                          type="password"
+                          name="password"
+                          id="password"
+                          oninput="validatePassword()"
+                        />
+                        <% if (passwordError) { %>
+                        <span
+                          class="text-danger d-flex justify-content-center align-items-center"
+                          ><%= passwordError %></span
+                        >
+                        <% } %>
+                        <span
+                          class="text-danger d-flex justify-content-center align-items-center"
+                          id="passwordError"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div
+                      class="text-center col-12 col-sm-12 col-md-12 col-lg-12"
+                    >
+                      <input
+                        type="submit"
+                        id="submitButtonlogin"
+                        class="btn mb-3"
+                        value="Login"
+                      />
+                      <p class="mb-4">
+                        <a href="#" id="RecoverPassword"
+                          >Forgot your password?</a
+                        >
+                        &nbsp; | &nbsp;
+                        <a href="/signup" id="customer_register_link"
+                          >Create account</a
+                        >
+                      </p>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--End Body Content-->
+      <script src="../validations/userValidation.js"></script>
+
+      <!--Footer-->
+
+      <%-include("userFooter")%>
+    </div>
+  </body>
+</html>

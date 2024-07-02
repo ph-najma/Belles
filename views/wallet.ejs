@@ -1,0 +1,37 @@
+<%-include("userHeader")%>
+
+<div class="container">
+  <h1 class="mt-5">My Wallet</h1>
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Wallet Balance</div>
+        <div class="card-body">
+          <h5 class="card-title">$<%=userData[0].wallet%></h5>
+          <p class="card-text">Available Balance</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Transaction History</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <% for (let i = 0; i < walletData.length; i++) { %>
+            <li class="list-group-item">
+              <%=walletData[i].transactionType%> -Rs.<%= walletData[i].amount %>
+              - <%= date[i].timestamp %>
+            </li>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<%-include("userFooter")%>

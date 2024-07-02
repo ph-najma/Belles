@@ -1,0 +1,108 @@
+<%-include("userHeader")%>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div id="page-content">
+  <!--Page Title-->
+  <div class="page section-header text-center">
+    <div class="page-title">
+      <div class="wrapper"><h1 class="page-width">Return</h1></div>
+    </div>
+  </div>
+  <!--End Page Title-->
+
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
+        <div class="mb-4">
+          <form
+            method="post"
+            action="/returnProduct"
+            id="returnForm"
+            accept-charset="UTF-8"
+            class="contact-form"
+          >
+            <div class="row">
+              <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group">
+                  <label>REASON</label>
+                  <input
+                    type="text"
+                    name="reason"
+                    id="reason"
+                    placeholder="Reason"
+                    required
+                  />
+                  <input type="hidden" name="orderId" value="<%=orderId%>" />
+                  <input
+                    type="hidden"
+                    name="productId"
+                    value="<%=productId%>"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="text-center col-12 col-sm-12 col-md-12 col-lg-12">
+                <input
+                  type="submit"
+                  class="btn mb-3"
+                  value="Request for Return"
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("returnForm");
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Your return request has been submitted successfully!",
+          }).then(() => {
+            window.location.href = "/showOrders"; // Redirect to showorders page
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text:
+              result.message || "There was an error processing your request.",
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "There was a server error. Please try again later.",
+        });
+      }
+    });
+  });
+</script>
+
+<!--End Body --->
+<%-include("userFooter")%>

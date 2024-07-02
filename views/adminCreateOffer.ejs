@@ -1,0 +1,52 @@
+<%-include("adminHeader")%>
+<link
+  href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  rel="stylesheet"
+/>
+
+<div class="form-container">
+  <h3>Create Offer</h3>
+  <form id="createCouponForm" action="/createOffer" method="POST">
+    <div class="form-group">
+      <label>Offer Name</label>
+      <input
+        class="form-control"
+        type="text"
+        placeholder="Offer Name"
+        name="name"
+        id="name"
+        oninput="validateName()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="nameError" style="color: red"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Offer Percentage</label>
+      <input
+        class="form-control"
+        type="text"
+        placeholder="Offer Percentage"
+        name="percentage"
+        id="percentage"
+        oninput="validatePercentage()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="percentageError" style="color: red"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Offer Product</label>
+      <select class="mx-auto my-3 form-control" name="product">
+        <% for(let i=0; i < data.length; i++) { %>
+        <option value="<%= data[i]._id %>"><%= data[i].name %></option>
+
+        <% } %>
+      </select>
+    </div>
+
+    <button type="submit" class="btn" id="submitButton" disabled>Submit</button>
+  </form>
+</div>
+<script src="../validations/offerValidation.js"></script>
+<%-include("adminFooter")%>

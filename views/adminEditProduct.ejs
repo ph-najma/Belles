@@ -1,0 +1,434 @@
+<%- include('adminHeader') %>
+<link
+  href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  rel="stylesheet"
+/>
+
+<div class="formdiv">
+  <div class="form-container">
+    <h3>Edit PRODUCT</h3>
+    <form
+      id="editProductForm"
+      action="/editProduct?_id=<%=product._id%>"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <div class="form-group">
+        <label>Name</label>
+        <input
+          class="form-control"
+          type="text"
+          value="<%=product.name%>"
+          name="name"
+          id="name"
+          oninput="validateName()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="nameError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input
+          class="form-control"
+          type="text"
+          value="<%=product.price%>"
+          name="price"
+          id="price"
+          oninput="validatePrice()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="priceError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Offer Price</label>
+        <input
+          class="form-control"
+          type="text"
+          value="<%=product.offerprice%>"
+          name="offerprice"
+          id="offerprice"
+          oninput="validateOfferPrice()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="offerpriceError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Select Brand</label>
+        <select
+          class="form-control"
+          name="brand"
+          id="brand"
+          oninput="validateBrand()"
+        >
+          <option value="<%=product.brand%>" disabled selected>
+            <%=product.brand%>
+          </option>
+          <option value="H&M">H&M</option>
+          <option value="LEVIS">LEVIS</option>
+          <option value="ADDIDAS">ADDIDAS</option>
+          <option value="Zara">Zara</option>
+          <option value="Nike">Nike</option>
+        </select>
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="brandError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Choose Corresponding Stock</label>
+        <label>stock for small</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.sizes.s%>"
+          name="sizes[s]"
+          id="stock"
+          oninput="validateProductStock()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="stockError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>stock for medium</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.sizes.m%>"
+          name="sizes[m]"
+          id="stock"
+          oninput="validateProductStock()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="stockError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>stock for large</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.sizes.l%>"
+          name="sizes[l]"
+          id="stock"
+          oninput="validateProductStock()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="stockError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>stock for xl</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.sizes.xl%>"
+          name="sizes[xl]"
+          id="stock"
+          oninput="validateProductStock()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="stockError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>stock for xxl</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.sizes.xxl%>"
+          name="sizes[xxl]"
+          id="stock"
+          oninput="validateProductStock()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="stockError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Quantity of the product</label>
+        <input
+          class="form-control"
+          type="number"
+          value="<%=product.quantity%>"
+          name="quantity"
+          id="qty"
+          oninput="validateQuantity()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="quantityError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input
+          class="form-control"
+          type="text"
+          value="<%=product.desc%>"
+          name="desc"
+          id="desc"
+          oninput="validatedesc()"
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="descError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <label>Select Category</label>
+        <select
+          class="form-control"
+          name="category"
+          id="category"
+          oninput="validatecategory()"
+        >
+          <option value="<%=product.category%>" disabled selected>
+            <%=product.category.name%>
+          </option>
+          <% categories.forEach(category => { %>
+            <option value="<%= category._id %>" <%= category._id.equals(product.category._id) ? 'selected' : '' %>>
+              <%= category.name %>
+            </option>
+          <% }); %>
+        </select>
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="categoryError"
+        ></span>
+      </div>
+      <div class="form-group">
+        <div
+          id="image-preview"
+          data-product-images="<%= JSON.stringify(product.images) %>"
+        ></div>
+
+        <label>Upload images</label>
+        <input
+          type="file"
+          class="form-control-file"
+          name="images"
+          id="images"
+          oninput="validateImages()"
+          multiple
+        />
+        <span
+          class="text-danger d-flex justify-content-center align-items-center"
+          id="imageError"
+        ></span>
+      </div>
+
+      <button type="submit" class="btn" id="submitButton">Submit</button>
+    </form>
+  </div>
+</div>
+<script src="../validations/adminEditProductValidation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const previewArea = document.getElementById("image-preview");
+    const productImages = JSON.parse(previewArea.dataset.productImages || "[]");
+    const productId = "<%=product._id%>"; // Get the product ID
+
+    previewArea.innerHTML = ""; // Clear previous previews
+
+    productImages.forEach(function (imageUrl, index) {
+      const container = document.createElement("div");
+      container.style.display = "inline-block";
+      container.style.position = "relative";
+      container.style.marginRight = "10px";
+
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.style.width = "100px"; // Set desired width for preview images
+      img.style.height = "100px"; // Set desired height for preview images
+      container.appendChild(img);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.innerHTML = "Delete";
+      deleteBtn.style.position = "absolute";
+      deleteBtn.style.top = "0";
+      deleteBtn.style.right = "0";
+      deleteBtn.style.backgroundColor = "black";
+      deleteBtn.style.color = "white";
+      deleteBtn.style.border = "none";
+      deleteBtn.style.cursor = "pointer";
+      deleteBtn.addEventListener("click", async function () {
+        // Remove the image from the preview
+        previewArea.removeChild(container);
+
+        // Send request to delete the image from the database
+        try {
+          const response = await fetch("/deleteImage", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: productId,
+              imageUrl: imageUrl,
+            }),
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            // Remove the image from the array if the server deletion is successful
+            Toastify({
+              text: "Image deleted successfully",
+              duration: 3000,
+              close: true,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "black",
+              stopOnFocus: true,
+            }).showToast();
+          } else {
+            Toastify({
+              text: "Error deleting image",
+              duration: 3000,
+              close: true,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "black",
+              stopOnFocus: true,
+            }).showToast();
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          Toastify({
+            text: "Error deleting image",
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "black",
+            stopOnFocus: true,
+          }).showToast();
+        }
+      });
+      container.appendChild(deleteBtn);
+
+      previewArea.appendChild(container);
+    });
+  });
+
+  document
+    .getElementById("images")
+    .addEventListener("change", function (event) {
+      const previewArea = document.getElementById("image-preview");
+      previewArea.innerHTML = ""; // Clear previous previews
+
+      const files = event.target.files;
+      for (const file of files) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          const container = document.createElement("div");
+          container.style.display = "inline-block";
+          container.style.position = "relative";
+          container.style.marginRight = "10px";
+
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.style.width = "100px"; // Set desired width for preview images
+          img.style.height = "100px"; // Set desired height for preview images
+          container.appendChild(img);
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.innerHTML = "Delete";
+          deleteBtn.style.position = "absolute";
+          deleteBtn.style.top = "0";
+          deleteBtn.style.right = "0";
+          deleteBtn.style.backgroundColor = "black";
+          deleteBtn.style.color = "white";
+          deleteBtn.style.border = "none";
+          deleteBtn.style.cursor = "pointer";
+          deleteBtn.addEventListener("click", function () {
+            previewArea.removeChild(container); // Remove the image preview
+          });
+          container.appendChild(deleteBtn);
+
+          previewArea.appendChild(container);
+        };
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+  document
+    .getElementById("editProductForm")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      const formData = new FormData(this);
+
+      const imageFiles = document.getElementById("images").files;
+      for (const file of imageFiles) {
+        formData.append("images", file);
+      }
+
+      try {
+        const response = await fetch(this.action, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          if (responseData.success) {
+            // Display success message
+            setTimeout(() => {
+              window.location.href = "/productManagement";
+            }, 3000);
+            Toastify({
+              text: "Product updated successfully",
+              duration: 3000,
+              close: true,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "black",
+              stopOnFocus: true,
+            }).showToast();
+            this.reset();
+          } else {
+            // Display error message
+            Toastify({
+              text: "Error updating product",
+              duration: 3000,
+              close: true,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "black",
+              stopOnFocus: true,
+            }).showToast();
+          }
+        } else {
+          // Display error message
+          Toastify({
+            text: "Error updating product",
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "black",
+            stopOnFocus: true,
+          }).showToast();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    });
+</script>
+
+<%- include('adminFooter') %>

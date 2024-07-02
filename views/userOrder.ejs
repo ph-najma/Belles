@@ -1,0 +1,113 @@
+<%- include("userHeader") %>
+
+<!--End Mobile Menu-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!--Body Content-->
+<div id="page-content">
+  <!--Page Title-->
+  <div class="page section-header text-center">
+    <div class="page-title">
+      <div class="wrapper"><h1 class="page-width">Orders</h1></div>
+    </div>
+  </div>
+  <!--End Page Title-->
+</div>
+<div style="padding: 60px">
+  <% orders.forEach(order => { %>
+
+  <!-- Display order details -->
+  <div class="order">
+    <p>Order Date: <%= order.orderDate.toDateString() %></p>
+    <p>Total Price: $<%= order.totalPrice %></p>
+    <!-- Display products in this order -->
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Product Image</th>
+          <th scope="col">Product Name</th>
+          <th scope="col">Price</th>
+          <th scope="col">Status</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let hasPending = false; %> <% order.item.forEach(item => { %>
+        <tr>
+          <td>
+            <img
+              src="<%= item.product.images[0] %>"
+              alt="<%= item.product.name %>"
+              style="max-width: 100px; max-height: 100px"
+            />
+          </td>
+          <td><%= item.product.name %></td>
+          <td>$<%= item.price %></td>
+          <td><%= item.status %></td>
+          <td>
+            <!-- Define actions based on item status -->
+            <% if (item.status === 'Placed') { %>
+            <a
+              href="/cancelOrder?orderId=<%= order._id %>&productId=<%= item.product._id %>"
+              class="btn"
+              >Cancel</a
+            >
+            <% } else if (item.status === 'pending' && !hasPending) { %> <%
+            hasPending = true; %>
+            <form action="/continuePayment" method="POST">
+              <input type="hidden" name="orderId" value="<%= order._id %>" />
+              <button type="submit" class="btn">Continue Payment</button>
+            </form>
+            <% } else if (item.status === 'Cancelled' || item.status ===
+            'return_requested') { %>
+            <a href="/productDetail?_id=<%= item.product._id %>" class="btn"
+              >ReOrder</a
+            >
+            <% } else if (item.status === 'Completed') { %> <% const now = new
+            Date(); %> <% const sixDaysAgo = new Date(); %> <%
+            sixDaysAgo.setDate(now.getDate() - 6); %> <% if (new
+            Date(order.orderDate) > sixDaysAgo) { %>
+            <a
+              href="/returnForm?orderId=<%= order._id %>&productId=<%= item.product._id %>"
+              class="btn"
+              >Return</a
+            >
+            <% } else { %>
+            <a href="/productDetail?_id=<%= item.product._id %>" class="btn"
+              >Reorder</a
+            >
+            <% } %> <% } %>
+          </td>
+        </tr>
+        <% }) %> <% if (hasPending) { %> <% hasPending = false; %> <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% }) %>
+</div>
+<!--End Body Content-->
+
+<!--Footer-->
+<%- include("userFooter") %>
+<!-- Including SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("cancelSuccess")) {
+      Swal.fire({
+        title: "Success!",
+        text: "Order successfully cancelled.",
+        icon: "success",
+        confirmButtonText: "OK",
+      }).then(() => {
+        // Optionally, you can remove the query parameter from the URL after showing the alert
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      });
+    }
+  });
+</script>

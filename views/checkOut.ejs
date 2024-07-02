@@ -1,0 +1,638 @@
+<%-include("userHeader")%>
+<!-- Include SweetAlert CSS -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+/>
+
+<!-- Include SweetAlert JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!--Body Content-->
+<div id="page-content">
+  <!--Page Title-->
+  <div class="page section-header text-center">
+    <div class="page-title">
+      <div class="wrapper"><h1 class="page-width">Checkout</h1></div>
+    </div>
+  </div>
+  <!--End Page Title-->
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="customer-box returning-customer">
+          <h3>
+            <i class="icon anm anm-user-al"></i> Delivery Address
+
+            <a
+              href="#customer-login"
+              id="customer"
+              class="text-white text-decoration-underline"
+              data-toggle="collapse"
+              >Click here to add new</a
+            >
+          </h3>
+          <div id="customer-login" class="collapse customer-content">
+            <div class="customer-info">
+              <form method="post" id="addAddressForm" action="/newAddress">
+                <div class="row">
+                  <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <label for="exampleInputEmail1"
+                      >Phone <span class="required-f">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="no-margin"
+                      id="exampleInputEmail1"
+                      name="phone"
+                      required
+                    />
+                  </div>
+                  <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <label for="exampleInputPassword1"
+                      >postcode <span class="required-f">*</span></label
+                    >
+                    <input
+                      type="number"
+                      id="exampleInputPassword1"
+                      name="postcode"
+                    />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>Country <span class="required-f">*</span></label>
+                    <input type="text" name="country" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>State <span class="required-f">*</span></label>
+                    <input type="text" name="state" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>address <span class="required-f">*</span></label>
+                    <input type="text" name="address" />
+                    <button type="submit" class="btn btn-primary mt-3">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="customer-box customer-coupon">
+          <h3 class="font-15 xs-font-13">
+            <i class="icon anm anm-gift-l"></i> Have a coupon?
+            <a
+              href="#have-coupon"
+              class="text-white text-decoration-underline"
+              data-toggle="collapse"
+              >Click here to enter your code</a
+            >
+          </h3>
+          <div id="have-coupon" class="collapse coupon-checkout-content">
+            <div class="discount-coupon">
+              <div id="coupon" class="coupon-dec tab-pane active">
+                <p class="margin-10px-bottom">
+                  Enter your coupon code if you have one.
+                </p>
+                <label class="required get" for="coupon-code"
+                  ><span class="required-f">*</span> Coupon</label
+                >
+                <select
+                  class="w-50 mx-auto my-3"
+                  name="coupon"
+                  onchange="applyCoupon(this.value)"
+                >
+                  <option value="">Select Coupon</option>
+                  <% for (let i=0; i < coupon.length; i++) { %>
+                  <option value="<%= coupon[i]._id %>">
+                    <%= coupon[i].code %>
+                  </option>
+                  <% } %>
+                </select>
+                <button
+                  class="coupon-btn btn"
+                  id="couponCancelbutton"
+                  onclick="cancelSelection()"
+                  style="display: none"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row billing-fields">
+      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 sm-margin-30px-bottom">
+        <div class="create-ac-content bg-light-gray padding-20px-all">
+          <div class="your-payment">
+            <h2 class="payment-title mb-3">Saved Addresses</h2>
+            <div class="payment-method">
+              <form action="/placeOrder" method="post" id="orderForm">
+                <div id="accordion" class="payment-section">
+                  <!-- Direct Bank Transfer -->
+                  <% if (addresses.length > 0) { %> <% for (let i = 0; i <
+                  addresses.length; i++) { %>
+                  <div class="card mb-2">
+                    <div class="card-header">
+                      <input
+                        type="radio"
+                        name="addressId"
+                        id="address_<%= i %>"
+                        value="<%= addresses[i]._id %>"
+                        class="card-link"
+                        data-toggle="collapse"
+                        href="#collapseOne_<%= i %>"
+                      />
+                      <label for="address_<%= i %>">Address <%= i + 1 %></label>
+                    </div>
+                    <div
+                      id="collapseOne_<%= i %>"
+                      class="collapse"
+                      data-parent="#accordion"
+                    >
+                      <div class="card-body">
+                        <p class="no-margin font-15">
+                          <br />
+                          <%= addresses[i].phone %><br /><%=
+                          addresses[i].address %><br /><%= addresses[i].postcode
+                          %><br /><%= addresses[i].country %><br /><%=
+                          addresses[i].state %><br /><br />
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <% } %> <% } %>
+                </div>
+                <hr />
+
+                <div class="your-payment">
+                  <h2 class="payment-title mb-3">Payment Method</h2>
+                  <div class="payment-method">
+                    <div id="accordion2" class="payment-section">
+                      <!-- Direct Bank Transfer -->
+
+                      <!-- Cash on Delivery -->
+                      <div class="card mb-2">
+                        <div class="card-header">
+                          <input
+                            type="radio"
+                            id="cashDelivery"
+                            name="paymentMethod"
+                            value="cashDelivery"
+                            class="collapsed card-link"
+                            data-toggle="collapse"
+                            href="#collapseTwo"
+                          />
+                          <label for="cashDelivery">Cash on Delivery</label>
+                        </div>
+                        <div
+                          id="collapseTwo"
+                          class="collapse"
+                          data-parent="#accordion2"
+                        >
+                          <div class="card-body">
+                            <p class="no-margin font-15">
+                              Please send your cheque to Store Name, Store
+                              Street, Store Town, Store State / County, Store
+                              Postcode.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- PayPal -->
+                      <div class="card mb-2">
+                        <div class="card-header">
+                          <input
+                            type="radio"
+                            id="razorpay"
+                            name="paymentMethod"
+                            value="razorpay"
+                            class="collapsed card-link"
+                            data-toggle="collapse"
+                            href="#collapseThree"
+                          />
+                          <label for="paypal">Razorpay</label>
+                        </div>
+                        <div
+                          id="collapseThree"
+                          class="collapse"
+                          data-parent="#accordion2"
+                        >
+                          <div class="card-body">
+                            <div id="paypal-button-container"></div>
+                            <p class="no-margin font-15">
+                              Pay via PayPal; you can pay with your credit card
+                              if you don't have a PayPal account.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Credit/ATM card -->
+                    </div>
+                    <input type="text" id="totalPrice" hidden />
+                    <div class="order-button-payment text-center mt-4">
+                      <button
+                        class="btn btn-primary"
+                        type="submit"
+                        value="Place order"
+                        id="placeOrderButton"
+                      >
+                        Place order
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+        <div class="wallet-method" style="display: flex; margin-top: 10px">
+          <input
+            type="checkbox"
+            name="wallet"
+            id="wallet-0"
+            style="margin: 0px"
+          />
+          <label for="wallet-0" style="margin-bottom: 0px">
+            &nbsp;&nbsp;Pay from wallet (Current Balance:₹<%= userData.wallet %>
+            )
+          </label>
+        </div>
+
+        <div class="your-order-payment mt-3">
+          <div class="your-order">
+            <h2 class="order-title mb-4">Your Order</h2>
+            <div class="table-responsive-sm order-table">
+              <table
+                class="bg-white table table-bordered table-hover text-center"
+              >
+                <thead>
+                  <tr>
+                    <th class="text-left">Product Name</th>
+                    <th>Price</th>
+                    <th>Size</th>
+                    <th>Qty</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%console.log(items)%> <% items.forEach((i) => { %>
+                  <tr>
+                    <td class="text-left"><%= i.product.name %></td>
+                    <td>$<%= i.product.price %></td>
+                    <td><%= i.size %></td>
+                    <td><%= i.quantity %></td>
+                    <td>$<%= i.product.price * i.quantity %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+                <tfoot class="font-weight-600">
+                  <tr>
+                    <td colspan="4" class="text-right">Shipping</td>
+                    <td><strong><%=shippingCharge%></strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="4" class="text-right">Discount</td>
+                    <td>
+                      <strong name="discount" id="discount">
+                        <% if (typeof Discount !== 'undefined' && Discount !==
+                        null) { %> <%= Discount %> <% } else { %> 0 <% } %>
+                      </strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="4" class="text-right">Total</td>
+                    <td>
+                      <strong id="totalAmount">$<%= totalPrice%></strong>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          <hr />
+        </div>
+      </div>
+    </div>
+    <!--End Body Content-->
+
+    <!--Footer-->
+    <%- include('userFooter') %>
+    <!--End Footer-->
+    <!--Scroll Top-->
+    <span id="site-scroll"><i class="icon anm anm-angle-up-r"></i></span>
+    <!--End Scroll Top-->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      document
+        .getElementById("placeOrderButton")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+
+          var selectedPaymentMethod = document.querySelector(
+            'input[name="paymentMethod"]:checked'
+          ).value;
+          let selectedAddressId = document.querySelector(
+            'input[name="addressId"]:checked'
+          ).value;
+          let totalAmountElement = document.getElementById("totalAmount");
+          let totalAmountText =
+            totalAmountElement.innerText || totalAmountElement.textContent;
+          let totalAmount = parseFloat(
+            totalAmountText.replace("Pay ", "").replace("$", "")
+          );
+
+          if (selectedPaymentMethod === "cashDelivery" && totalAmount > 1000) {
+            Swal.fire({
+              icon: "error",
+              title: "COD Not Available",
+              text: "COD is not available for orders above Rs 1000. Please select another payment method.",
+            });
+            return;
+          }
+
+          const walletCheckbox = document.getElementById("wallet-0");
+          const walletAmount = parseFloat("<%= userData.wallet %>");
+          let walletFlag = 0;
+
+          if (walletCheckbox.checked) {
+            if (walletAmount >= totalAmount) {
+              walletFlag = totalAmount;
+              totalAmount -= walletFlag;
+            } else {
+              walletFlag = walletAmount;
+            }
+          }
+
+          // Apply coupon discount if any
+          const couponDiscount = parseFloat(
+            document.getElementById("discount").innerText || 0
+          );
+
+          if (selectedPaymentMethod === "razorpay" && totalAmount > 0) {
+            fetch("/createOrder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ amount: totalAmount }), // Send the updated total amount here
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                var options = {
+                  key: "rzp_test_sHq1xf34I99z5x", // Enter the Key ID generated from the Dashboard
+                  amount: data.amount, // Amount is in currency subunits. Default currency is INR.
+                  currency: "INR",
+                  name: "Your Company Name",
+                  description: "Test Transaction",
+                  order_id: data.order_id, // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                  handler: function (response) {
+                    // Capture the payment
+                    fetch("/capturePayment", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                        amount: data.amount,
+                      }),
+                    })
+                      .then((res) => res.json())
+                      .then((result) => {
+                        if (result.status === "success") {
+                          // Redirect to place order route
+                          fetch("/placeOrder", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              addressId: selectedAddressId, // replace with actual address ID
+                              paymentMethod: "razorpay",
+                              wallet: walletFlag, // Pass the wallet amount used
+                              couponId: document.querySelector(
+                                'select[name="coupon"]'
+                              ).value, // Pass the coupon ID
+                            }),
+                          }).then(() => {
+                            window.location.href = "/orderSuccess";
+                          });
+                        } else {
+                          // Handle payment failure here
+                          handlePaymentFailure(); // Function to handle payment failure
+                          showPendingOrderConfirmation(
+                            selectedAddressId,
+                            selectedPaymentMethod,
+                            walletFlag
+                          ); // Show confirmation and create pending order
+                        }
+                      });
+                  },
+                  prefill: {
+                    name: "Your Name",
+                    email: "your.email@example.com",
+                    contact: "9999999999",
+                  },
+                  notes: {
+                    address: "Corporate Office",
+                  },
+                  theme: {
+                    color: "#3399cc",
+                  },
+                  modal: {
+                    ondismiss: function () {
+                      showPendingOrderConfirmation(
+                        selectedAddressId,
+                        selectedPaymentMethod,
+                        walletFlag
+                      ); // Function to show confirmation on modal dismiss (closing of modal)
+                    },
+                  },
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+              })
+              .catch((error) => {
+                console.error("Error creating order:", error);
+              });
+          } else if (selectedPaymentMethod !== "razorpay" || totalAmount <= 0) {
+            // Handle other payment methods or direct order placement for zero amount
+            fetch("/placeOrder", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                addressId: selectedAddressId, // replace with actual address ID
+                paymentMethod: selectedPaymentMethod,
+                wallet: walletFlag, // Pass the wallet amount used
+                couponId: document.querySelector('select[name="coupon"]').value, // Pass the coupon ID
+              }),
+            })
+              .then(() => {
+                window.location.href = "/orderSuccess";
+              })
+              .catch((error) => {
+                console.error("Error placing order:", error);
+              });
+          } else {
+            alert("Order amount must be greater than zero.");
+          }
+        });
+
+      const walletCheckbox = document.getElementById("wallet-0");
+      const totalPriceLabel = document.getElementById("totalAmount");
+
+      walletCheckbox.addEventListener("change", function () {
+        updateTotalAmount(); // Update total amount on wallet checkbox change
+      });
+
+      function updateTotalAmount() {
+        const walletBalance = parseFloat("<%= userData.wallet %>");
+        let totalPrice = parseFloat("<%= totalPrice %>");
+        const couponDiscount =
+          parseFloat(document.getElementById("discount").innerText) || 0;
+
+        if (walletCheckbox.checked) {
+          if (walletBalance >= totalPrice) {
+            totalPriceLabel.innerText = "Pay 0";
+          } else {
+            const remainingAmount = totalPrice - couponDiscount - walletBalance;
+            totalPriceLabel.innerText = "Pay " + remainingAmount.toFixed(2);
+          }
+        } else {
+          totalPriceLabel.innerText =
+            "Pay " + (totalPrice - couponDiscount).toFixed(2);
+        }
+      }
+
+      function cancelSelection() {
+        document.querySelector("select[name='coupon']").value = "";
+        try {
+          fetch("/cancelSelection", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ selectedCouponId: selectedCouponId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              let totalPrice = parseFloat("<%= totalPrice %>");
+              document.getElementById("discount").innerHTML = 0;
+              updateTotalAmount(); // Update total amount after canceling coupon
+              document.getElementById("totalPrice").value = totalPrice;
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function applyCoupon(couponId) {
+        try {
+          selectedCouponId = couponId;
+          document.querySelector("#couponCancelbutton").style.display = "block";
+          fetch("/applyCoupon", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ couponId: couponId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              let totalPrice = parseFloat("<%= totalPrice %>");
+              let discountAmount = parseFloat(
+                totalPrice * (data * 0.01)
+              ).toFixed(2);
+              totalPrice = totalPrice - discountAmount;
+              document.getElementById("discount").innerHTML = discountAmount;
+              updateTotalAmount(); // Update total amount after applying coupon
+              document.getElementById("totalPrice").value = totalPrice;
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function showPendingOrderConfirmation(
+        addressId,
+        paymentMethod,
+        walletFlag
+      ) {
+        Swal.fire({
+          title: "Order Pending",
+          text: "Your order is pending. Do you want to create a pending order?",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            createPendingOrder(addressId, paymentMethod, walletFlag);
+          } else {
+            // Handle cancellation or redirect as needed
+            window.location.href = "/orderFailure"; // Redirect to order failure page or handle as per your flow
+          }
+        });
+      }
+
+      function createPendingOrder(addressId, paymentMethod, walletFlag) {
+        fetch("/createPendingOrder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            addressId: addressId,
+            paymentMethod: paymentMethod,
+            wallet: walletFlag,
+            couponId: document.querySelector('select[name="coupon"]').value,
+          }),
+        })
+          .then(() => {
+            window.location.href = "/orderFailure"; // Redirect to pending order page
+          })
+          .catch((error) => {
+            console.error("Error creating pending order:", error);
+            // Handle error appropriately
+            window.location.href = "/orderFailure"; // Redirect to order failure page or handle as per your flow
+          });
+      }
+    </script>
+
+    <!-- Including Jquery -->
+    <script src="assets/js/vendor/jquery-3.3.1.min.js"></script>
+    <script src="assets/js/vendor/jquery.cookie.js"></script>
+    <script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
+    <script src="assets/js/vendor/wow.min.js"></script>
+    <!-- Including Javascript -->
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/plugins.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/lazysizes.js"></script>
+    <script src="assets/js/main.js"></script>
+  </div>
+</div>

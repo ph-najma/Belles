@@ -1,0 +1,153 @@
+<%-include("adminHeader")%>
+<div class="formdiv">
+  <div class="form-container">
+    <h3>Edit PRODUCT</h3>
+    <form
+      id="editProductForm"
+      action="/editproduct?_id=<%=product._id%>"
+      method="POST"
+    >
+      <div class="form-group">
+        <label>Name</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="<%=product.name%>"
+          name="name"
+          id="name"
+        />
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="<%=product.price%>"
+          name="price"
+          id="price"
+        />
+      </div>
+      <div class="form-group">
+        <label>Offer Price</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="<%=product.offerprice%>"
+          name="offerprice"
+          id="offerprice"
+        />
+      </div>
+      <div class="form-group">
+        <label>Select Brand</label>
+        <select
+          class="form-control"
+          name="brand"
+          id="brand"
+          aria-placeholder="<%=product.brand%>"
+        >
+          <option value="H&M">H&M</option>
+          <option value="LEVIS">LEVIS</option>
+          <option value="ADDIDAS">ADDIDAS</option>
+          <option value="Zara">Zara</option>
+          <option value="Nike">Nike</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Choose Corresponding quantity</label>
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.sizes.s%>"
+          name="sizes[s]"
+          id="s"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.sizes.m%>"
+          name="sizes[m]"
+          id="m"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.sizes.l%>"
+          name="sizes[l]"
+          id="l"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.sizes.xl%>"
+          name="sizes[xl]"
+          id="xl"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.sizes.xxl%>"
+          name="sizes[xxl]"
+          id="xxl"
+        />
+      </div>
+      <div class="form-group">
+        <label>Quantity of the product</label>
+        <input
+          class="form-control"
+          type="number"
+          placeholder="<%=product.quantity%>"
+          name="quantity"
+          id="quantity"
+        />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="<%=product.desc%>"
+          name="desc"
+          id="desc"
+        />
+      </div>
+      <div class="form-group">
+        <label>Select Category</label>
+        <select
+          class="form-control"
+          name="category"
+          id="category"
+          aria-placeholder="<%=product.category%>"
+        >
+          <option value="660562b63bdad1b9f04761b3">Women</option>
+          <option value="660562ba3bdad1b9f04761b6">Kids</option>
+          <option value="660562aa3bdad1b9f04761af">Mens</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div
+          id="image-preview"
+          data-product-images="<%= JSON.stringify(product.images) %>"
+        ></div>
+
+        <label>Upload images</label>
+        <input
+          type="file"
+          class="form-control-file"
+          name="images"
+          id="images"
+          multiple
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>

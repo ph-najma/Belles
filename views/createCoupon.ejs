@@ -1,0 +1,51 @@
+<%- include('adminHeader') %>
+
+<div class="form-container">
+  <form id="addCouponForm" action="/createCoupon" method="POST">
+    <div class="form-group">
+      <label>Create Coupon</label>
+      <input
+        class="form-control"
+        type="text"
+        placeholder="Coupon Code"
+        name="name"
+        id="name"
+        oninput="validateName()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="nameError" style="color: red"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <input
+        class="form-control"
+        type="number"
+        placeholder="Coupon Discount"
+        name="percentage"
+        id="percentage"
+        oninput="validatePercentage()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="percentageError" style="color: red"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <input
+        class="form-control"
+        type="date"
+        placeholder="Expiry-Date"
+        name="date"
+        id="date"
+        oninput="validateExpiryDate()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="expiryDateError" style="color: red"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <p class="text-center text-danger my-4"><%= footer %></p>
+  </form>
+</div>
+<script src="../validations/couponValidation.js"></script>
+<%- include('adminFooter') %>
