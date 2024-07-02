@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 console.log(User);
 const Products = require("../models/productModel");
+console.log(Products);
 const Address = require("../models/addressmodel");
 const Orders = require("../models/orderModel");
 const Cart = require("../models/cartModel");
