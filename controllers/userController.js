@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+console.log(User);
 const Products = require("../models/productModel");
 const Address = require("../models/addressmodel");
 const Orders = require("../models/orderModel");

@@ -1,5 +1,5 @@
-const Products = require("../models/productmodel");
-const Categories = require("../models/categorymodel");
+const Products = require("../models/productModel");
+const Categories = require("../models/categoryModel");
 const { ObjectId } = require("mongodb");
 
 const userProductList = async (req, res) => {
