@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 
 const connectToDatabase = async () => {
   try {
-    const mongoURI = "mongodb://localhost:27017/ecommerce";
+    const mongoURI =
+      "mongodb+srv://phnajma786:.j7Dnq5XgGQAWhN@cluster0.viosua5.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0";
     await mongoose.connect(mongoURI, {});
     console.log("Connected to MongoDB");
   } catch (error) {
