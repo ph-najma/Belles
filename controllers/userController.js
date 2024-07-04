@@ -41,7 +41,7 @@ const sendOtp = async (req, res) => {
         password = req.body.password ? req.body.password : password;
         refCode = req.body.referral;
         console.log(req.body);
-        sendOtpMail(email, generatedOtp);
+        sendOtpMail(email, generatedOtp, res);
         res.render("otpForm", { footer: "" });
         setTimeout(() => {
           saveOtp = null;
