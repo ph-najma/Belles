@@ -74,7 +74,7 @@ async function sendOtpMail(email, otp) {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: true,
+      secure: false,
       requireTLS: true,
       auth: {
         // TODO: replace `user` and `pass` values from <https://forwardemail.net>
