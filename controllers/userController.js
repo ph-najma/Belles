@@ -80,6 +80,11 @@ async function sendOtpMail(email, otp) {
         user: process.env.SMTP_MAIL,
         pass: process.env.SMTP_PASSWORD,
       },
+      tls: {
+        // Reject unauthorized servers or not
+        rejectUnauthorized: true,
+        secure: true, // Change to true in production
+      },
     });
     const mailOptions = {
       from: process.env.SMTP_MAIL,
