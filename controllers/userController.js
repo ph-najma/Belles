@@ -75,6 +75,7 @@ async function sendOtpMail(email, otp) {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       secure: false,
+      requireTLS: true,
       auth: {
         // TODO: replace `user` and `pass` values from <https://forwardemail.net>
         user: process.env.SMTP_MAIL,

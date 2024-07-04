@@ -20,7 +20,6 @@ const userProductList = async (req, res) => {
       query.$or = [
         { name: { $regex: cleanQuery.search, $options: "i" } },
         { brand: { $regex: cleanQuery.search, $options: "i" } },
-        // Add other fields as needed
       ];
     }
     if (cleanQuery.brand) {
