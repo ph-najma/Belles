@@ -94,7 +94,6 @@ async function sendOtpMail(email, otp) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(result);
   } catch (error) {
     console.log(error);
   }
