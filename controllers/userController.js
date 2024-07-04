@@ -10,6 +10,7 @@ const Wallet = require("../models/walletModel");
 const Wishlist = require("../models/wishlistModel");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
