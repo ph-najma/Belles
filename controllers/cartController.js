@@ -293,7 +293,7 @@ const loadCheckOut = async (req, res) => {
       created_at: -1,
     });
 
-    res.render("checkout", {
+    res.render("checkOut", {
       userData: user,
       items: pendingOrder.item,
       totalPrice,
