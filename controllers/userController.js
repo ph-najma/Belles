@@ -41,7 +41,7 @@ const sendOtp = async (req, res) => {
         password = req.body.password ? req.body.password : password;
         refCode = req.body.referral;
         console.log(req.body);
-        sendOtpMail(email, generatedOtp, res);
+        sendOtpMail(email, generatedOtp);
         res.render("otpForm", { footer: "" });
         setTimeout(() => {
           saveOtp = null;
@@ -94,9 +94,7 @@ async function sendOtpMail(email, otp) {
     const result = await transporter.sendMail(mailOptions);
     console.log(result);
   } catch (error) {
-    res.render("error", {
-      message: "Something went wrong in sending OTP through mail",
-    });
+    console.log(error);
   }
 }
 
