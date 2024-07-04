@@ -35,11 +35,16 @@
         </div>
         <div>
           <% if (item.status === 'return_requested') { %>
-          <p>Product Returned</p>
+          <a
+            class="btn btn-primary"
+            href="/returnAprroval?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
+          >
+            Approve request
+          </a>
           <% } else { %>
           <a
             class="btn btn-primary"
-            href="/changestatus?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
+            href="/changeStatus?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
           >
             Change Status
           </a>

@@ -545,28 +545,6 @@ const returnProduct = async (req, res) => {
     product.status = "return_requested";
     product.reason = reason;
 
-    // Calculate the amount to credit back to the wallet
-    const returnedProductPrice = product.price;
-    const totalAmountToCredit = parseFloat(returnedProductPrice);
-
-    // Create a wallet transaction for the credit
-    const topUpTransaction = new Wallet({
-      userId: order.userId,
-      transactionType: "Credited",
-      amount: totalAmountToCredit,
-    });
-
-    await topUpTransaction.save();
-
-    // Update the user's wallet balance in the User model
-    const user = await User.findOneAndUpdate(
-      { _id: order.userId },
-      { $inc: { wallet: totalAmountToCredit } },
-      { new: true }
-    );
-
-    await user.save();
-
     await order.save();
     console.log("Order updated and saved successfully");
 

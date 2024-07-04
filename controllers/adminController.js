@@ -4,6 +4,7 @@ const Product = require("../models/productModel");
 const Orders = require("../models/orderModel");
 const Coupon = require("../models/couponModel");
 const Offer = require("../models/offerModel");
+const Wallet = require("../models/walletModel");
 const bcrypt = require("bcrypt");
 const ejs = require("ejs");
 const multer = require("multer");
@@ -458,6 +459,72 @@ const changeNewStatus = async (req, res) => {
   }
 };
 
+const renderApproval = async (req, res) => {
+  try {
+    const orderId = req.query.orderId;
+    const itemIndex = req.query.itemIndex;
+    console.log(itemIndex);
+    res.render("adminReturnApproval", { orderId, itemIndex });
+  } catch (error) {
+    res.render("error", {
+      message: "Something went wrong in loading change status form",
+    });
+  }
+};
+
+const returnApproval = async (req, res) => {
+  try {
+    const { orderId, itemIndex, status } = req.body;
+    const order = await Orders.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const product = order.item[itemIndex];
+    if (!product) {
+      return res.status(404).json({ message: "Product not found in order" });
+    }
+
+    if (status === "approve") {
+      // Approve return request
+      product.status = "Completed";
+
+      // Calculate the amount to credit back to the wallet
+      const returnedProductPrice = product.price;
+      const totalAmountToCredit = parseFloat(returnedProductPrice);
+
+      // Create a wallet transaction for the credit
+      const topUpTransaction = new Wallet({
+        userId: order.userId,
+        transactionType: "Credited",
+        amount: totalAmountToCredit,
+      });
+
+      await topUpTransaction.save();
+
+      // Update the user's wallet balance in the User model
+      const user = await User.findOneAndUpdate(
+        { _id: order.userId },
+        { $inc: { wallet: totalAmountToCredit } },
+        { new: true }
+      );
+
+      await user.save();
+    } else if (status === "cancel") {
+      // Cancel return request
+      product.status = "Cancelled";
+    }
+
+    await order.save();
+    return res.redirect("/ordermanagement");
+  } catch (error) {
+    console.error("Error in returnApproval:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong in return approval" });
+  }
+};
 /*=======================================
 =========coupon Management==============
 ========================================*/
@@ -1518,6 +1585,8 @@ module.exports = {
   orderManagement,
   changeStatus,
   changeNewStatus,
+  renderApproval,
+  returnApproval,
   rendercouponCreate,
   createCoupon,
   renderCouponList,
