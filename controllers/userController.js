@@ -82,7 +82,7 @@ async function sendOtpMail(email, otp) {
       },
       tls: {
         // Reject unauthorized servers or not
-        rejectUnauthorized: false, // Change to true in production
+        rejectUnauthorized: true, // Change to true in production
       },
     });
     const mailOptions = {
