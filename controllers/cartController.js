@@ -354,7 +354,7 @@ const loadCheckOut = async (req, res) => {
       });
       console.log(cartData);
 
-      res.render("checkout", {
+      res.render("checkOut", {
         userData: user,
         items: cartData.map((cart) => cart.item),
         totalPrice: cartData[0].totalPrice,
