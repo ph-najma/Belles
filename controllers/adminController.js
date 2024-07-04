@@ -207,7 +207,7 @@ const productList = async (req, res) => {
     const productdata = await Product.find({ isDeleted: false }).populate(
       "category"
     );
-    res.render("adminProductmanagement", { products: productdata });
+    res.render("adminProductManagement", { products: productdata });
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in loading productlist",
