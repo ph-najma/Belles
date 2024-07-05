@@ -965,7 +965,7 @@ const weeklySales = async (req, res) => {
     const ejsData = ejs.render(htmlString, orderData);
     await createWeeklySalesPdf(ejsData);
     await createWeeklySalesExcel(todaysOrders);
-    const pdfFilePath = "WeeklySalesReport.pdf";
+    const pdfFilePath = path.resolve(__dirname, "WeeklySalesReport.pdf");
     const pdfData = fs.readFileSync(pdfFilePath);
 
     const excelFilePath = "WeeklySalesReport.xlsx";
