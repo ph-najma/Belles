@@ -448,13 +448,33 @@ const showOrder = async (req, res) => {
   try {
     const id = req.session.user._id;
     console.log(id);
-    const orderdata = await Orders.find({ userId: id })
+    const orders = await Orders.find({ userId: id })
       .populate("item.product")
       .sort({ orderDate: -1 });
 
-    console.log(orderdata);
-    res.render("userOrder", { orders: orderdata });
+    // Calculate original price and discount for each order
+    const ordersWithBreakdown = orders.map((order) => {
+      if (order.couponId) {
+        const originalPrice = order.item.reduce((sum, item) => {
+          return sum + item.price * item.quantity;
+        }, 0);
+        const discountAmount = (originalPrice * order.discountPercentage) / 100;
+        const discountedPrice = originalPrice - discountAmount;
+
+        return {
+          ...order.toObject(),
+          originalPrice,
+          discountAmount,
+          discountedPrice,
+        };
+      } else {
+        return order.toObject();
+      }
+    });
+
+    res.render("userOrder", { orders: ordersWithBreakdown });
   } catch (error) {
+    console.error("Error in showOrder:", error);
     res.render("error", { message: "Something went wrong in Showing orders" });
   }
 };
@@ -483,30 +503,26 @@ const cancelOrder = async (req, res) => {
 
     await order.save();
 
-    // Calculate the amount to credit back to the wallet
-    const cancelledProductPrice = itemToCancel.price;
-    const totalAmountToCredit = parseFloat(cancelledProductPrice);
+    // Restock the product in the database
+    const product = await Products.findById(productId);
 
-    const topUpTransaction = new Wallet({
-      userId: order.userId,
-      transactionType: "Credited",
-      amount: totalAmountToCredit,
-    });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-    await topUpTransaction.save();
+    const size = itemToCancel.size.toLowerCase(); // Assuming the size field is case-insensitive
+    if (product.sizes[size] !== undefined) {
+      product.sizes[size] += itemToCancel.quantity;
+    } else {
+      product.quantity += itemToCancel.quantity; // Update quantity for size-less products
+    }
 
-    // Update user's wallet by adding the credited amount
-
-    const user = await User.findOneAndUpdate(
-      { _id: req.session.user._id },
-      { $inc: { wallet: totalAmountToCredit } },
-      { new: true }
-    );
-    await user.save();
+    await product.save();
 
     // Redirect with a query parameter to indicate success
     return res.redirect("/showorders?cancelSuccess=true");
   } catch (error) {
+    console.error("Error in cancelOrder:", error);
     res.render("error", {
       message: "Something went wrong in Cancelling order",
     });

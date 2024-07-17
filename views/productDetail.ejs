@@ -206,13 +206,15 @@
               >
                 <span class="visually-hidden">Regular price</span>
                 <s id="ComparePrice-product-template"
-                  ><span class="money">$<%=product.price%></span></s
+                  ><span class="money">&#8377;<%=product.price%></span></s
                 >
                 <span
                   class="product-price__price product-price__price-product-template product-price__sale product-price__sale--single"
                 >
                   <span id="ProductPrice-product-template"
-                    ><span class="money">$<%=product.offerprice%></span></span
+                    ><span class="money"
+                      >&#8377;<%=product.offerprice%></span
+                    ></span
                   >
                 </span>
                 <span class="discount-badge">
@@ -223,7 +225,7 @@
                     class="product-single__save-amount"
                   >
                     <span class="money"
-                      >$<%=product.price-product.offerprice%></span
+                      >&#8377;<%=product.price-product.offerprice%></span
                     >
                   </span>
                 </span>
@@ -916,10 +918,10 @@
                 <!-- product price -->
                 <div class="product-price">
                   <span class="old-price"
-                    >$<%= relatedProducts[i].price %></span
+                    >&#8377;<%= relatedProducts[i].price %></span
                   >
                   <span class="price"
-                    >$<%= relatedProducts[i].offerprice %></span
+                    >&#8377;<%= relatedProducts[i].offerprice %></span
                   >
                 </div>
                 <!-- End product price -->

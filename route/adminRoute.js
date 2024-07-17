@@ -52,6 +52,11 @@ router.get(
   auth.adminLogin,
   adminController.orderManagement
 );
+router.get(
+  "/returnRequests",
+  auth.adminLogin,
+  adminController.renderReturnRequets
+);
 router.get("/changeStatus", auth.adminLogin, adminController.changeStatus);
 router.post("/changeStatus", auth.adminLogin, adminController.changeNewStatus);
 router.get("/returnAprroval", auth.adminLogin, adminController.renderApproval);

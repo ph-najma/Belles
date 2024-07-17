@@ -12,13 +12,36 @@
   </div>
   <!--End Page Title-->
 </div>
+
+<style>
+  .order {
+    border: 1px solid #ccc; /* Add a border */
+    padding: 20px; /* Add padding */
+    margin-bottom: 20px; /* Add space between orders */
+    background-color: #f9f9f9; /* Optional: Add background color */
+    border-radius: 10px; /* Optional: Add rounded corners */
+  }
+  .order-header {
+    background-color: #e9ecef; /* Optional: Add a different background color for the header */
+    padding: 10px;
+    border-radius: 5px;
+  }
+</style>
+
 <div style="padding: 60px">
   <% orders.forEach(order => { %>
-
   <!-- Display order details -->
   <div class="order">
-    <p>Order Date: <%= order.orderDate.toDateString() %></p>
+    <div class="order-header">
+      <p>Order Date: <%= order.orderDate.toDateString() %></p>
+    </div>
+    <% if (order.couponId) { %>
+    <p>Original Price: $<%= order.originalPrice %></p>
+    <p>Discount Amount: $<%= order.discountAmount %></p>
+    <p>Discounted Price: $<%= order.discountedPrice %></p>
+    <% } else { %>
     <p>Total Price: $<%= order.totalPrice %></p>
+    <% } %>
     <!-- Display products in this order -->
     <table class="table table-hover">
       <thead>
@@ -82,7 +105,6 @@
       </tbody>
     </table>
   </div>
-
   <% }) %>
 </div>
 <!--End Body Content-->

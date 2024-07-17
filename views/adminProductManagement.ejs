@@ -41,7 +41,7 @@
           </ul>
           <% } else { %> Out of Stock <% } %>
         </td>
-        <td><%= products[i].price %></td>
+        <td>&#8377;<%= products[i].price %></td>
         <td><a href="/editProduct?_id=<%= products[i]._id %>">Edit</a></td>
         <td>
           <button class="btn" onclick="confirmDelete('<%= products[i]._id %>')">

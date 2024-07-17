@@ -20,6 +20,10 @@ const couponSchema = new mongoose.Schema({
     type: String,
     default: "Active",
   },
+  maxLimit: {
+    type: Number,
+    required: true,
+  },
 
   usedBy: [
     {

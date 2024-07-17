@@ -56,10 +56,10 @@
                 </td>
                 <td class="cart__price-wrapper cart-flex-item">
                   <span class="money" id="price-<%= i.item._id %>"
-                    >$<%= i.item.product.price %></span
+                    >&#8377;<%= i.item.product.price %></span
                   >
                 </td>
-
+                <%console.log("this",i.item.product.sizes[i.item.size])%>
                 <td class="cart__update-wrapper cart-flex-item text-right">
                   <div class="cart__qty text-center">
                     <div class="qtyField">
@@ -74,10 +74,9 @@
                         class="cart__qty-input qty"
                         min="1"
                         type="number"
-                        max="<%=i.item.product.sizes[i.item.size]%>"
-                        id="qty<%=i.item._id %>"
+                        max="<%= (i.item.size && i.item.sizes && i.item.sizes[i.item.size] !== undefined) ? i.item.sizes[i.item.size] : 0 %>"
+                        id="qty-<%=i.item._id%>"
                         value="<%= i.item.quantity %>"
-                        onchange="validateQuantity(this)"
                       />
                       <button
                         class="qtyBtn plus"
@@ -92,7 +91,7 @@
                 <td class="text-right small--hide cart-price">
                   <div>
                     <span class="money" id="total-price-<%= i.item._id %>"
-                      >$<%= i.item.price %></span
+                      >&#8377;<%= i.item.price %></span
                     >
                   </div>
                 </td>
@@ -584,20 +583,20 @@
                 >
                 <span class="col-12 col-sm-6 text-right"
                   ><span class="money" id="sub-total"
-                    >$<%=totalPrice-shippingCharge%></span
+                    >&#8377;<%=totalPrice-shippingCharge%></span
                   ></span
                 >
               </div>
               <div class="row border-bottom pb-2 pt-2">
                 <span class="col-12 col-sm-6 cart__subtotal-title">Tax</span>
-                <span class="col-12 col-sm-6 text-right">$00</span>
+                <span class="col-12 col-sm-6 text-right">&#8377;00</span>
               </div>
               <div class="row border-bottom pb-2 pt-2">
                 <span class="col-12 col-sm-6 cart__subtotal-title"
                   >Shipping</span
                 >
                 <span class="col-12 col-sm-6 text-right"
-                  ><%=shippingCharge%></span
+                  >&#8377;<%=shippingCharge%></span
                 >
               </div>
               <div class="row border-bottom pb-2 pt-2">
@@ -607,7 +606,7 @@
                 <span
                   class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right"
                   ><span class="money" id="grand-total"
-                    >$<%=totalPrice%></span
+                    >&#8377;<%=totalPrice%></span
                   ></span
                 >
               </div>
@@ -656,19 +655,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  function validateQuantity(input) {
-    const max = parseInt(input.max);
-    const value = parseInt(input.value);
-    if (value > max) {
-      input.value = max;
-    }
-  }
   function decrementOrIncrementCart(cartId, itemId, value) {
     event.preventDefault();
 
-    const qtyInput = document.getElementById("qty" + itemId);
+    const qtyInput = document.getElementById(`qty-${itemId}`);
     let currentQuantity = parseInt(qtyInput.value);
-
+    console.log(currentQuantity);
+    console.log(qtyInput.value);
     // Function to show alert and update quantity in input field
     function showAlertAndUpdateQuantity(message) {
       Swal.fire({
@@ -676,7 +669,7 @@
         title: "Oops...",
         text: message,
       }).then(() => {
-        qtyInput.value = currentQuantity + parseInt(value) - 1; // Decrease the quantity by 1
+        qtyInput.value = currentQuantity; // Decrease the quantity by 1
       });
     }
 
@@ -695,19 +688,12 @@
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data); // Check the received data
-
         if (data.error) {
           showAlertAndUpdateQuantity(data.error); // Show error message and update quantity
           return;
         }
-
-        // Update the quantity input value
-        if (qtyInput) {
-          qtyInput.value = data.qty;
-        } else {
-          console.error("Quantity input element not found.");
-        }
+        console.log(qtyInput.value);
+        qtyInput.value = data.qty.toString();
 
         // Update the total price in the DOM
         const totalPriceElement = document.getElementById(
@@ -721,7 +707,7 @@
 
         const grandTotalElement = document.getElementById("grand-total");
         if (grandTotalElement) {
-          grandTotalElement.innerText = "$" + (data.totalprice + 10).toFixed(2); // Assuming tax is fixed at $10
+          grandTotalElement.innerText = "$" + data.totalprice.toFixed(2); // Assuming tax is fixed at $10
         } else {
           console.error("Grand total element not found.");
         }

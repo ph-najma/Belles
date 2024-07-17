@@ -80,18 +80,45 @@ const userList = async (req, res) => {
 };
 const blockUser = async (req, res) => {
   try {
-    const userid = req.query.id;
-    const user = await User.findById(userid);
+    const userId = req.query.id;
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).send("user not found");
+      return res.status(404).send("User not found");
     }
     user.is_blocked = true;
     await user.save();
+
+    // Destroy user session
+    const sessionStore = req.sessionStore; // Access the session store
+    sessionStore.all((err, sessions) => {
+      if (err) {
+        console.error("Error fetching sessions:", err);
+        return res.render("error", {
+          message: "Something went wrong in blocking user",
+        });
+      }
+
+      // Find and destroy the session of the blocked user
+      for (let sessionId in sessions) {
+        if (
+          sessions[sessionId].user &&
+          sessions[sessionId].user._id.toString() === userId
+        ) {
+          sessionStore.destroy(sessionId, (err) => {
+            if (err) {
+              console.error("Error destroying session:", err);
+            }
+          });
+        }
+      }
+    });
+
     return res.redirect("/usermanagement");
   } catch (error) {
     res.render("error", { message: "Something went wrong in blocking user" });
   }
 };
+
 const unBlockUser = async (req, res) => {
   try {
     const userid = req.query.id;
@@ -408,6 +435,10 @@ const orderManagement = async (req, res) => {
         await Orders.findByIdAndUpdate(order._id, { orderStatus: "Completed" });
         order.orderStatus = "Completed"; // Update local variable for immediate response
       }
+      if (order.couponId) {
+        order.originalPrice =
+          order.totalPrice / ((100 - order.discountPercentage) / 100);
+      }
     }
 
     res.render("adminOrderManagement", { Orders: orders });
@@ -455,6 +486,27 @@ const changeNewStatus = async (req, res) => {
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in changing new status",
+    });
+  }
+};
+
+const renderReturnRequets = async (req, res) => {
+  try {
+    const orders = await Orders.find({
+      item: {
+        $elemMatch: {
+          status: "return_requested",
+        },
+      },
+    })
+      .populate("userId")
+      .populate("item.product")
+      .populate("address");
+    res.render("adminReturnOrders", { Orders: orders });
+  } catch (error) {
+    console.log(error);
+    res.render("error", {
+      message: "Something went wrong in loading change status form",
     });
   }
 };
@@ -554,6 +606,7 @@ const createCoupon = async (req, res) => {
     const couponCode = req.body.name;
     const couponDiscount = req.body.percentage;
     const expiryDate = req.body.date;
+    const maxLimit = req.body.maxLimit;
     if (!couponCode || !couponDiscount || !expiryDate) {
       return res.status(400).send("Missing required fields");
     }
@@ -564,6 +617,7 @@ const createCoupon = async (req, res) => {
         code: couponCode.toLowerCase(),
         percentage: couponDiscount,
         expiryDate: expiryDate,
+        maxLimit: maxLimit,
       });
       await newCoupon.save();
       res.redirect("/couponlist");
@@ -832,7 +886,7 @@ const dailySales = async (req, res) => {
     const ejsData = ejs.render(htmlString, orderData);
     await createDailySales(ejsData);
     await createDailySalesExcel(todayOrders);
-    const pdfFilePath = "DailySalesReport.pdf";
+    const pdfFilePath = path.resolve(__dirname, "DailySalesReport.pdf");
     const pdfData = fs.readFileSync(pdfFilePath);
     const excelFilePath = "DailySalesReport.xlsx";
     const excelData = fs.readFileSync(excelFilePath);
@@ -1585,6 +1639,7 @@ module.exports = {
   orderManagement,
   changeStatus,
   changeNewStatus,
+  renderReturnRequets,
   renderApproval,
   returnApproval,
   rendercouponCreate,

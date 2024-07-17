@@ -32,6 +32,19 @@
     <div class="form-group">
       <input
         class="form-control"
+        type="number"
+        placeholder="Max Limit"
+        name="maxLimit"
+        id="maxLimit"
+        oninput="validateMaxLimit()"
+      />
+      <div style="display: flex; justify-content: center">
+        <span id="maxLimitError" style="color: red"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <input
+        class="form-control"
         type="date"
         placeholder="Expiry-Date"
         name="date"

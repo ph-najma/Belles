@@ -1,6 +1,10 @@
+let couponCode = false;
+let couponDiscount = false;
+let couponExpiry = false;
+let couponMaxLimit = false;
 const updateSubmitButton = () => {
   const submitButton = document.getElementById("submitButton");
-  if (couponCode && couponDiscount && couponExpiry) {
+  if (couponCode && couponDiscount && couponExpiry && couponMaxLimit) {
     submitButton.removeAttribute("disabled");
   } else {
     submitButton.setAttribute("disabled", "disabled");
@@ -72,5 +76,22 @@ function validateExpiryDate() {
       const ret = updateSubmitButton();
       document.getElementById("expiryDateError").innerText = "";
     }
+  }
+}
+
+function validateMaxLimit() {
+  let maxLimit = document.getElementById("maxLimit").value;
+  if (!maxLimit) {
+    couponMaxLimit = false;
+    document.getElementById("maxLimitError").innerText =
+      "Max limit is required";
+  } else if (maxLimit <= 0) {
+    couponMaxLimit = false;
+    document.getElementById("maxLimitError").innerText =
+      "Max limit should be a positive number";
+  } else {
+    couponMaxLimit = true;
+    document.getElementById("maxLimitError").innerText = "";
+    updateSubmitButton();
   }
 }

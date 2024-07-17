@@ -1,11 +1,8 @@
 <%- include('adminHeader') %>
 
 <div style="padding: 100px">
-  <div class="mb-4">
-    <a href="/returnRequests" class="btn">Return Requests</a>
-  </div>
   <div class="mb-4 text-center">
-    <h2>Total Orders</h2>
+    <h2>Retrun Requests</h2>
   </div>
   <% Orders.forEach((order) => { %>
   <div class="order-container mb-4 p-3 border rounded">
@@ -15,20 +12,6 @@
       User Name: <% if (order.userId && order.userId.name) { %> <%=
       order.userId.name %> <% } %>
     </p>
-
-    <% if (order.couponId) { %>
-    <div class="price-breakdown">
-      <p>
-        <strong>Original Price:</strong> $<%= order.originalPrice.toFixed(2) %>
-      </p>
-      <p><strong>Coupon Discount:</strong> <%= order.discountPercentage %>%</p>
-      <p>
-        <strong>Discounted Price:</strong> $<%= order.totalPrice.toFixed(2) %>
-      </p>
-    </div>
-    <% } else { %>
-    <p><strong>Total Price:</strong> $<%= order.totalPrice.toFixed(2) %></p>
-    <% } %>
 
     <div class="order-items">
       <% order.item.forEach((item, itemIndex) => { %>
@@ -57,16 +40,9 @@
           <% if (item.status === 'return_requested') { %>
           <a
             class="btn btn-primary"
-            href="/returnApproval?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
+            href="/returnAprroval?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
           >
             Approve request
-          </a>
-          <% } else { %>
-          <a
-            class="btn btn-primary"
-            href="/changeStatus?orderId=<%= order._id %>&itemIndex=<%= itemIndex %>"
-          >
-            Change Status
           </a>
           <% } %>
         </div>

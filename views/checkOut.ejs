@@ -296,31 +296,32 @@
                   <%console.log(items)%> <% items.forEach((i) => { %>
                   <tr>
                     <td class="text-left"><%= i.product.name %></td>
-                    <td>$<%= i.product.price %></td>
+                    <td>&#8377;<%= i.product.price %></td>
                     <td><%= i.size %></td>
                     <td><%= i.quantity %></td>
-                    <td>$<%= i.product.price * i.quantity %></td>
+                    <td>&#8377;<%= i.product.price * i.quantity %></td>
                   </tr>
                   <% }); %>
                 </tbody>
                 <tfoot class="font-weight-600">
                   <tr>
                     <td colspan="4" class="text-right">Shipping</td>
-                    <td><strong><%=shippingCharge%></strong></td>
+                    <td><strong>&#8377;<%=shippingCharge%></strong></td>
                   </tr>
                   <tr>
                     <td colspan="4" class="text-right">Discount</td>
                     <td>
-                      <strong name="discount" id="discount">
-                        <% if (typeof Discount !== 'undefined' && Discount !==
-                        null) { %> <%= Discount %> <% } else { %> 0 <% } %>
+                      <strong name="discount" id="discount"
+                        >&#8377; <% if (typeof Discount !== 'undefined' &&
+                        Discount !== null) { %> <%= Discount %> <% } else { %> 0
+                        <% } %>
                       </strong>
                     </td>
                   </tr>
                   <tr>
                     <td colspan="4" class="text-right">Total</td>
                     <td>
-                      <strong id="totalAmount">$<%= totalPrice%></strong>
+                      <strong id="totalAmount">&#8377;<%= totalPrice%></strong>
                     </td>
                   </tr>
                 </tfoot>

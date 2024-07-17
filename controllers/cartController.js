@@ -370,68 +370,73 @@ const loadCheckOut = async (req, res) => {
 
 const decrementOrIncrementCart = async (req, res) => {
   try {
-    const cartId = req.body.cartId;
-    const itemId = req.body.itemId;
-    const value = parseInt(req.body.value);
+    const { cartId, itemId, value } = req.body;
 
     const cartDoc = await Cart.findOne({ _id: cartId });
     const item = cartDoc.item.find((i) => i._id.toString() === itemId);
     const product = await Products.findOne({ _id: item.product });
 
-    // Calculate updated quantity
-    const updatedQuantity = item.quantity + value;
-    let updatedPrice;
+    const updatedQuantity = item.quantity + parseInt(value, 10);
 
-    // Check if the updated quantity is within the available stock
     if (updatedQuantity > product.sizes[item.size]) {
       return res
         .status(400)
         .json({ error: "Quantity exceeds available stock." });
     }
 
-    // If quantity becomes zero or negative, remove the item from the cart
     if (updatedQuantity <= 0) {
       await Cart.updateOne(
         { _id: cartId },
-        { $pull: { item: { _id: new ObjectId(item._id) } } }
+        { $pull: { item: { _id: itemId } } }
       );
-      updatedPrice = 0;
-    } else {
-      updatedPrice = updatedQuantity * product.price; // Calculate price based on updated quantity
+
+      const updatedCart = await Cart.findOne({ _id: cartId });
+      const totalCartPrice = updatedCart.item.reduce(
+        (acc, cur) => acc + cur.price,
+        0
+      );
+      const totalQty = updatedCart.item.reduce(
+        (acc, cur) => acc + cur.quantity,
+        0
+      );
+
+      await Cart.updateOne(
+        { _id: cartId },
+        { $set: { totalPrice: totalCartPrice, totalQty: totalQty } }
+      );
+
+      return res.json({
+        success: true,
+        qty: 0,
+        price: 0,
+        totalprice: totalCartPrice,
+      });
     }
 
-    // Calculate the difference in price caused by quantity change
+    const updatedPrice = updatedQuantity * product.price;
     const priceDifference = updatedPrice - item.quantity * product.price;
 
-    // Update the cart item if quantity is within valid range
-    if (updatedQuantity > 0) {
-      await Cart.updateOne(
-        { _id: cartId, "item._id": itemId },
-        {
-          $set: {
-            "item.$.quantity": updatedQuantity,
-            "item.$.price": updatedPrice,
-          },
-          $inc: { totalPrice: priceDifference },
-        }
-      );
-    }
+    await Cart.updateOne(
+      { _id: cartId, "item._id": itemId },
+      {
+        $set: {
+          "item.$.quantity": updatedQuantity,
+          "item.$.price": updatedPrice,
+        },
+        $inc: { totalPrice: priceDifference },
+      }
+    );
 
-    // Fetch updated cart data
     const updatedCart = await Cart.findOne({ _id: cartId });
-
-    // Calculate total price of the cart by summing up the prices of all items
     const totalCartPrice = updatedCart.item.reduce(
       (acc, cur) => acc + cur.price,
       0
     );
-
     const totalQty = updatedCart.item.reduce(
       (acc, cur) => acc + cur.quantity,
       0
     );
 
-    // Update the total price of the cart
     await Cart.updateOne(
       { _id: cartId },
       { $set: { totalPrice: totalCartPrice, totalQty: totalQty } }
@@ -444,7 +449,7 @@ const decrementOrIncrementCart = async (req, res) => {
       totalprice: totalCartPrice,
     });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
