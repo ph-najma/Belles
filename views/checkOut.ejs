@@ -350,15 +350,23 @@
           var selectedPaymentMethod = document.querySelector(
             'input[name="paymentMethod"]:checked'
           ).value;
-          let selectedAddressId = document.querySelector(
+          let selectedAddressInput = document.querySelector(
             'input[name="addressId"]:checked'
-          ).value;
+          );
+          if (!selectedAddressInput) {
+            Swal.fire({
+              icon: "error",
+              title: "No Address Selected",
+              text: "Please select a delivery address before placing the order.",
+            });
+            return;
+          }
+          let selectedAddressId = selectedAddressInput.value;
+
           let totalAmountElement = document.getElementById("totalAmount");
           let totalAmountText =
             totalAmountElement.innerText || totalAmountElement.textContent;
-          let totalAmount = parseFloat(
-            totalAmountText.replace("Pay ", "").replace("$", "")
-          );
+          let totalAmount = parseFloat(totalAmountText.replace(/[^\d.]/g, ""));
 
           if (selectedPaymentMethod === "cashDelivery" && totalAmount > 1000) {
             Swal.fire({
