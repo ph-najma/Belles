@@ -1,13 +1,13 @@
 {
   "name": "belleshopping",
   "version": "1.0.0",
-  "description": "",
+  "description": "Belle Shopping - Node.js EJS eCommerce app",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
-  "author": "",
+  "author": "Najma",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
