@@ -9,7 +9,7 @@ connectToDatabase();
 
 router.get("/signup", userController.renderSignup);
 router.post("/signup", userController.sendOtp);
-router.get("/login", userController.checkLoggedIn, userController.renderLogin);
+router.get("/login", auth.checkLoggedIn, userController.renderLogin);
 router.post("/login", userController.login);
 router.get("/otp", userController.renderOtp);
 router.post("/otp", userController.verifyOtp);
@@ -51,7 +51,7 @@ router.post(
   userController.removeWishlistItem
 );
 router.get("/wallet", auth.userLogin, userController.renderWallet);
-router.get("/orderSuccess", auth.userLogin, userController.renderOrdersuccess);
+router.get("/orderSuccess", auth.userLogin, userController.renderOrderSuccess);
 router.get("/orderFailure", auth.userLogin, userController.renderOrderFailure);
 router.post(
   "/createPendingOrder",

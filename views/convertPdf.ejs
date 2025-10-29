@@ -14,31 +14,23 @@
     </tr>
   </thead>
   <tbody>
-    <% for (let i = 0; i < todaysOrders.length; i++) { %>
+    <% todaysOrders.forEach((order, index) => { %> <%
+    order.productDetails.forEach((product, productIndex) => { %>
+    <p><%=order%></p>
     <tr>
-      <td style="width: 10px"><%= i + 1 %></td>
-      <td><%= todaysOrders[i].user.name %></td>
+      <td><%= productIndex === 0 ? index + 1 : '' %></td>
+      <td><%= productIndex === 0 ? order.user.name : '' %></td>
+      <td><%= product.name %></td>
+      <td><%= order.item[productIndex].quantity %></td>
       <td>
-        <% todaysOrders[i].productDetails.forEach((product) => { %> <%=
-        product.name %> <% }); %>
-      </td>
-      <td>
-        <% todaysOrders[i].item.forEach((item) => { %> <%= item.quantity %> <%
-        }); %>
-      </td>
-      <td>
-        <% todaysOrders[i].item.forEach((item) => { %> <%= item.quantity *
-        item.price %> <% }); %>
-      </td>
-
-      <td><%= todaysOrders[i].discount %></td>
-      <td><%= todaysOrders[i].couponDeduction %></td>
-      <td><%= todaysOrders[i].paymentType %></td>
-      <td>
-        <% todaysOrders[i].item.forEach((item) => { %> <%= item.status %> <% });
+        <%= order.item[productIndex].quantity * order.item[productIndex].price
         %>
       </td>
+      <td><%= productIndex === 0 ? order.discount.toFixed(2) : '' %></td>
+      <td><%= productIndex === 0 ? order.couponDeduction.toFixed(2) : '' %></td>
+      <td><%= productIndex === 0 ? order.paymentType : '' %></td>
+      <td><%= productIndex === 0 ? order.orderStatus : '' %></td>
     </tr>
-    <% } %>
+    <% }) %> <% }) %>
   </tbody>
 </table>

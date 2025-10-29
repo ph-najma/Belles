@@ -14,6 +14,7 @@ const fs = require("fs");
 const ExcelJS = require("exceljs");
 
 const puppeteer = require("puppeteer");
+const adminService = require("../services/adminService");
 
 /*====================================
 ==============LOGIN====================
@@ -35,31 +36,28 @@ const checkLoggedIn = (req, res, next) => {
 
 const admin = async (req, res) => {
   try {
+    const { email, password } = req.body;
     let emailError = "";
     let passwordError = "";
-    const check = await User.findOne({ email: req.body.email });
-    if (check) {
-      const passmatch = await bcrypt.compare(req.body.password, check.password);
-      console.log(passmatch);
-      if (passmatch) {
-        if (check.is_admin === 1) {
-          req.session.admin = check._id;
-          req.session.loginadminSuccess = true;
-          req.session.save();
-          res.redirect("/dashboard");
-        } else {
-          emailError = "Email not found";
-          res.render("adminLogin", { emailError, passwordError });
-        }
-      } else {
-        passwordError = "Wrong password";
-        res.render("adminLogin", { emailError, passwordError });
-      }
-    } else {
-      passwordError = "Wrong password";
-      res.render("adminLogin", { emailError, passwordError });
+
+    const result = await adminService.adminLogin(email, password);
+
+    if (!result.success) {
+      // Error handling based on error type
+      if (result.errorType === "email") emailError = result.message;
+      if (result.errorType === "password") passwordError = result.message;
+
+      return res.render("adminLogin", { emailError, passwordError });
     }
+
+    // ✅ Admin login success
+    req.session.admin = result.user._id;
+    req.session.loginadminSuccess = true;
+    req.session.save(() => {
+      res.redirect("/dashboard");
+    });
   } catch (error) {
+    console.error("Error in admin login:", error);
     res.render("error", { message: "Something went wrong in Login" });
   }
 };
@@ -69,10 +67,10 @@ const admin = async (req, res) => {
 =====================================*/
 const userList = async (req, res) => {
   try {
-    const userdata = await User.find({ is_admin: 0 });
-
-    res.render("adminUserManagement", { users: userdata });
+    const users = await adminService.getAllNonAdminUsers();
+    res.render("adminUserManagement", { users });
   } catch (error) {
+    console.error("Error loading user list:", error);
     res.render("error", {
       message: "Something went wrong in loading userList",
     });
@@ -80,67 +78,46 @@ const userList = async (req, res) => {
 };
 const blockUser = async (req, res) => {
   try {
-    const userId = req.query.id;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
+    const userId = req.body.id;
+    console.log(req.query);
+    const sessionStore = req.sessionStore;
+    console.log(userId);
+
+    const result = await adminService.blockUserById(userId, sessionStore);
+    console.log(result);
+    if (!result.success) {
+      return res.status(404).send(result.message);
     }
-    user.is_blocked = true;
-    await user.save();
 
-    // Destroy user session
-    const sessionStore = req.sessionStore; // Access the session store
-    sessionStore.all((err, sessions) => {
-      if (err) {
-        console.error("Error fetching sessions:", err);
-        return res.render("error", {
-          message: "Something went wrong in blocking user",
-        });
-      }
-
-      // Find and destroy the session of the blocked user
-      for (let sessionId in sessions) {
-        if (
-          sessions[sessionId].user &&
-          sessions[sessionId].user._id.toString() === userId
-        ) {
-          sessionStore.destroy(sessionId, (err) => {
-            if (err) {
-              console.error("Error destroying session:", err);
-            }
-          });
-        }
-      }
-    });
-
-    return res.redirect("/usermanagement");
+    return res.json({ success: true });
   } catch (error) {
+    console.error("Error blocking user:", error);
     res.render("error", { message: "Something went wrong in blocking user" });
   }
 };
 
 const unBlockUser = async (req, res) => {
   try {
-    const userid = req.query.id;
-    const user = await User.findById(userid);
-    if (!user) {
-      return res.status(404).send("user not found");
+    const userId = req.body.id;
+    const result = await adminService.unblockUserById(userId);
+
+    if (!result.success) {
+      return res.status(404).send(result.message);
     }
-    user.is_blocked = false;
-    await user.save();
-    return res.redirect("/usermanagement");
+
+    return res.json({ success: true });
   } catch (error) {
+    console.error("Error unblocking user:", error);
     res.render("error", { message: "Something went wrong in Unblocking user" });
   }
 };
 /*====================================
 =========CATEGORY MANAGEMENT==========
 =====================================*/
-
 const categoryList = async (req, res) => {
   try {
-    const categorydata = await Categories.find({ isDeleted: false });
-    res.render("adminCategoryManagement", { Category: categorydata });
+    const categoryData = await adminService.getAllCategories();
+    res.render("adminCategoryManagement", { Category: categoryData });
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in category listing",
@@ -150,9 +127,9 @@ const categoryList = async (req, res) => {
 const renderEditCategory = async (req, res) => {
   try {
     const id = req.query._id;
-    const categorydata = await Categories.findById({ _id: id });
-    if (categorydata) {
-      res.render("adminEditCategory", { Category: categorydata });
+    const categoryData = await adminService.getCategoryById(id);
+    if (categoryData) {
+      res.render("adminEditCategory", { Category: categoryData });
     } else {
       res.redirect("/adminHome");
     }
@@ -165,14 +142,7 @@ const renderEditCategory = async (req, res) => {
 const editCategory = async (req, res) => {
   try {
     const id = req.query.id;
-    const productdata = await Categories.findByIdAndUpdate(
-      { _id: id },
-      {
-        $set: {
-          name: req.body.name,
-        },
-      }
-    );
+    await adminService.updateCategory(id, req.body.name);
     res.status(201).json({ success: true });
   } catch (error) {
     res.render("error", {
@@ -185,11 +155,8 @@ const renderAddCcategory = (req, res) => {
 };
 const addCategory = async (req, res) => {
   try {
-    let name = req.body.name;
-    console.log(req.body);
-    name = name.toLowerCase();
-
-    const existingCategory = await Categories.findOne({ name });
+    let name = req.body.name.toLowerCase();
+    const existingCategory = await adminService.findCategoryByName(name);
 
     if (existingCategory) {
       return res
@@ -197,10 +164,7 @@ const addCategory = async (req, res) => {
         .json({ success: false, message: "Category already exists" });
     }
 
-    const newCategory = new Categories({ name });
-
-    await newCategory.save();
-
+    await adminService.createCategory(name);
     res.status(200).json({ success: true });
   } catch (error) {
     res.render("error", { message: "Something went wrong in adding Category" });
@@ -209,14 +173,8 @@ const addCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
-    const categorydata = await Categories.findByIdAndUpdate(
-      { _id: req.query._id },
-      {
-        $set: {
-          isDeleted: true,
-        },
-      }
-    );
+    const id = req.query._id;
+    await adminService.softDeleteCategory(id);
     res
       .status(200)
       .json({ success: true, message: "Category deleted successfully" });
@@ -232,13 +190,11 @@ const deleteCategory = async (req, res) => {
 
 const productList = async (req, res) => {
   try {
-    const productdata = await Product.find({ isDeleted: false }).populate(
-      "category"
-    );
-    res.render("adminProductManagement", { products: productdata });
+    const productData = await adminService.getAllProducts();
+    res.render("adminProductManagement", { products: productData });
   } catch (error) {
     res.render("error", {
-      message: "Something went wrong in loading productlist",
+      message: "Something went wrong in loading product list",
     });
   }
 };
@@ -250,60 +206,26 @@ const renderAddProduct = (req, res) => {
 ===============MULTER=================
 =====================================*/
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
-
-const upload = multer({ storage });
-
 const addProduct = async (req, res) => {
   try {
-    const { name, price, offerprice, brand, sizes, quantity, desc, category } =
-      req.body;
-    if (!req.files || req.files.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No files were uploaded." });
-    }
-    const images = req.files.map((file) => file.path);
-
-    const newProduct = new Product({
-      name,
-      price,
-      offerprice,
-      brand,
-      sizes,
-      quantity,
-      desc,
-      category,
-      images,
-    });
-
-    await newProduct.save();
+    await adminService.addNewProduct(req.body, req.files);
     res.status(201).json({ success: true });
   } catch (error) {
+    if (error.message === "No files were uploaded.") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     res.render("error", { message: "Something went wrong in adding Product" });
   }
 };
 const renderEditProduct = async (req, res) => {
   try {
     const id = req.query._id;
-    const productdata = await Product.findById({ _id: id }).populate(
-      "category"
-    );
-    const categories = await Categories.find();
-    console.log(categories);
-    if (productdata) {
+    const productData = await adminService.getProductById(id);
+    const categories = await adminService.getAllCategories();
+
+    if (productData) {
       res.render("adminEditProduct", {
-        product: productdata,
+        product: productData,
         categories: categories,
       });
     } else {
@@ -317,42 +239,12 @@ const renderEditProduct = async (req, res) => {
 };
 const editProduct = async (req, res) => {
   try {
-    console.log(req.body);
-    const updateFields = {};
-
-    if (req.body.name) updateFields.name = req.body.name;
-    if (req.body.price) updateFields.price = req.body.price;
-    if (req.body.offerprice) updateFields.offerprice = req.body.offerprice;
-    if (req.body.brand) updateFields.brand = req.body.brand;
-    if (req.body.sizes) {
-      updateFields.sizes = {
-        s: req.body.sizes.s,
-        m: req.body.sizes.m,
-        l: req.body.sizes.l,
-        xl: req.body.sizes.xl,
-        xxl: req.body.sizes.xxl,
-      };
-    }
-    if (req.body.quantity) updateFields.quantity = req.body.quantity;
-    if (req.body.desc) updateFields.desc = req.body.desc;
-    if (req.body.category) updateFields.category = req.body.category;
-
-    if (req.files && req.files.length > 0) {
-      const imagePaths = req.files.map((file) => file.path);
-      updateFields.images = imagePaths;
-    }
-    const productData = await Product.findByIdAndUpdate(
-      { _id: req.query._id },
-      { $set: updateFields },
-      { new: true }
-    );
-
-    if (!productData) {
-      return res.status(404).json({ success: false });
-    }
-
+    await adminService.updateProduct(req.query._id, req.body, req.files);
     res.status(200).json({ success: true });
   } catch (error) {
+    if (error.message === "Product not found") {
+      return res.status(404).json({ success: false });
+    }
     res.render("error", { message: "Something went wrong in editing product" });
   }
 };
@@ -380,24 +272,24 @@ const deleteImage = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
-    console.log(req.query._id);
-    const productdata = await Product.findByIdAndUpdate(
-      { _id: req.query._id },
-      {
-        $set: {
-          isDeleted: true,
-        },
-      }
-    );
+    const productId = req.query._id;
+    await adminService.deleteProduct(productId);
+
     res
       .status(200)
       .json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
+    if (error.message === "Product not found") {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
     res.render("error", {
       message: "Something went wrong in deleting product",
     });
   }
 };
+
 /*====================================
 ===============HOME==================
 =====================================*/
@@ -412,78 +304,52 @@ const adminHome = (req, res) => {
 
 const orderManagement = async (req, res) => {
   try {
-    const orders = await Orders.find()
-      .populate({
-        path: "item.product",
-        populate: { path: "category" },
-      })
-      .populate("userId")
-      .sort({ orderDate: -1 });
-    console.log(orders);
-    // Iterate through each order to check if all items are completed
-    for (let order of orders) {
-      let allCompleted = true;
-      for (let item of order.item) {
-        if (item.status !== "Completed") {
-          allCompleted = false;
-          break;
-        }
-      }
-
-      // If all items in the order are completed, update order status to 'Completed'
-      if (allCompleted) {
-        await Orders.findByIdAndUpdate(order._id, { orderStatus: "Completed" });
-        order.orderStatus = "Completed"; // Update local variable for immediate response
-      }
-      if (order.couponId) {
-        order.originalPrice =
-          order.totalPrice / ((100 - order.discountPercentage) / 100);
-      }
-    }
-
+    const orders = await adminService.getAllOrders();
     res.render("adminOrderManagement", { Orders: orders });
   } catch (error) {
-    res.render("error", { message: "Something went wrong in loading orders" });
+    res.render("error", {
+      message: "Something went wrong in loading orders",
+    });
   }
 };
+
+// Ledger view for specific order
 const ledger = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const order = await Orders.findById(orderId);
+    const order = await adminService.getOrderById(orderId);
     res.json(order);
   } catch (error) {
+    if (error.message === "Order not found") {
+      return res.status(404).json({ message: "Order not found" });
+    }
     res.render("error", { message: "Something went wrong in loading ledger" });
   }
 };
+
+// Render change status form
 const changeStatus = async (req, res) => {
   try {
-    const orderId = req.query.orderId;
-    const itemIndex = req.query.itemIndex;
-    console.log(itemIndex);
-    res.render("adminChangeStatus", { orderId, itemIndex });
+    const { orderId, itemIndex } = req.query;
+    const data = adminService.getChangeStatusData(orderId, itemIndex);
+    res.render("adminChangeStatus", data);
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in loading change status form",
     });
   }
 };
+
+// Update the new status of an order item
 const changeNewStatus = async (req, res) => {
   try {
     const { orderId, itemIndex, status } = req.body;
-    console.log(req.body);
-
-    const order = await Orders.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    order.item[itemIndex].status = status;
-
-    await order.save();
-
+    await adminService.updateItemStatus(orderId, itemIndex, status);
     return res.redirect("/ordermanagement");
   } catch (error) {
+    if (error.message === "Order not found") {
+      return res.status(404).json({ message: "Order not found" });
+    }
     res.render("error", {
       message: "Something went wrong in changing new status",
     });
@@ -492,34 +358,24 @@ const changeNewStatus = async (req, res) => {
 
 const renderReturnRequets = async (req, res) => {
   try {
-    const orders = await Orders.find({
-      item: {
-        $elemMatch: {
-          status: "return_requested",
-        },
-      },
-    })
-      .populate("userId")
-      .populate("item.product")
-      .populate("address");
+    const orders = await adminService.getReturnRequests();
     res.render("adminReturnOrders", { Orders: orders });
   } catch (error) {
-    console.log(error);
+    console.error("Error in renderReturnRequests:", error);
     res.render("error", {
-      message: "Something went wrong in loading change status form",
+      message: "Something went wrong while loading return requests",
     });
   }
 };
 
-const renderApproval = async (req, res) => {
+const renderApproval = (req, res) => {
   try {
-    const orderId = req.query.orderId;
-    const itemIndex = req.query.itemIndex;
-    console.log(itemIndex);
+    const { orderId, itemIndex } = req.query;
     res.render("adminReturnApproval", { orderId, itemIndex });
   } catch (error) {
+    console.error("Error in renderApproval:", error);
     res.render("error", {
-      message: "Something went wrong in loading change status form",
+      message: "Something went wrong while loading approval form",
     });
   }
 };
@@ -527,54 +383,13 @@ const renderApproval = async (req, res) => {
 const returnApproval = async (req, res) => {
   try {
     const { orderId, itemIndex, status } = req.body;
-    const order = await Orders.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    const product = order.item[itemIndex];
-    if (!product) {
-      return res.status(404).json({ message: "Product not found in order" });
-    }
-
-    if (status === "approve") {
-      // Approve return request
-      product.status = "Completed";
-
-      // Calculate the amount to credit back to the wallet
-      const returnedProductPrice = product.price;
-      const totalAmountToCredit = parseFloat(returnedProductPrice);
-
-      // Create a wallet transaction for the credit
-      const topUpTransaction = new Wallet({
-        userId: order.userId,
-        transactionType: "Credited",
-        amount: totalAmountToCredit,
-      });
-
-      await topUpTransaction.save();
-
-      // Update the user's wallet balance in the User model
-      const user = await User.findOneAndUpdate(
-        { _id: order.userId },
-        { $inc: { wallet: totalAmountToCredit } },
-        { new: true }
-      );
-
-      await user.save();
-    } else if (status === "cancel") {
-      // Cancel return request
-      product.status = "Cancelled";
-    }
-
-    await order.save();
-    return res.redirect("/ordermanagement");
+    await adminService.processReturnApproval(orderId, itemIndex, status);
+    res.redirect("/ordermanagement");
   } catch (error) {
     console.error("Error in returnApproval:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong in return approval" });
+    res.status(500).json({
+      message: "Something went wrong in return approval process",
+    });
   }
 };
 /*=======================================
@@ -583,9 +398,10 @@ const returnApproval = async (req, res) => {
 
 const renderCouponList = async (req, res) => {
   try {
-    const coupondata = await Coupon.find();
-    res.render("adminCouponList", { data: coupondata });
+    const couponData = await adminService.getAllCoupons();
+    res.render("adminCouponList", { data: couponData });
   } catch (error) {
+    console.error("Error in renderCouponList:", error);
     res.render("error", {
       message: "Something went wrong in loading coupon list",
     });
@@ -603,39 +419,33 @@ const rendercouponCreate = async (req, res) => {
 };
 const createCoupon = async (req, res) => {
   try {
-    const couponCode = req.body.name;
-    const couponDiscount = req.body.percentage;
-    const expiryDate = req.body.date;
-    const maxLimit = req.body.maxLimit;
-    if (!couponCode || !couponDiscount || !expiryDate) {
-      return res.status(400).send("Missing required fields");
-    }
-    const lowerCouponCode = couponCode.toLowerCase();
-    const couponExist = await Coupon.findOne({ code: lowerCouponCode });
-    if (!couponExist) {
-      const newCoupon = new Coupon({
-        code: couponCode.toLowerCase(),
-        percentage: couponDiscount,
-        expiryDate: expiryDate,
-        maxLimit: maxLimit,
+    const result = await adminService.createNewCoupon(req.body);
+
+    if (result.exists) {
+      return res.render("adminCouponCreate", {
+        footer: "Coupon already exists",
       });
-      await newCoupon.save();
-      res.redirect("/couponlist");
-    } else {
-      res.render("adminCouponCreate", { footer: "Coupon already exists" });
     }
+
+    res.redirect("/couponlist");
   } catch (error) {
-    res.render("error", { message: "Something went wrong in creating coupon" });
+    console.error("Error in createCoupon:", error);
+    res.render("error", {
+      message: "Something went wrong in creating coupon",
+    });
   }
 };
 const deleteCoupon = async (req, res) => {
   try {
-    await Coupon.findByIdAndDelete(req.params.id);
+    await adminService.deleteCouponById(req.params.id);
     res
       .status(200)
       .json({ success: true, message: "Coupon deleted successfully" });
   } catch (error) {
-    res.render("error", { message: "Something went wrong in deleting coupon" });
+    console.error("Error in deleteCoupon:", error);
+    res.render("error", {
+      message: "Something went wrong in deleting coupon",
+    });
   }
 };
 /*====================================
@@ -643,22 +453,21 @@ const deleteCoupon = async (req, res) => {
 =====================================*/
 const renderOfferList = async (req, res) => {
   try {
-    const offerData = await Offer.find()
-      .populate("product")
-      .populate("category");
-
+    const offerData = await adminService.getAllOffers();
     res.render("adminOfferList", { data: offerData });
   } catch (error) {
+    console.error("Error in renderOfferList:", error);
     res.render("error", { message: "Something went wrong in loading offers" });
   }
 };
 
 const rendercreateOffer = async (req, res) => {
   try {
-    const productData = await Product.find();
+    const productData = await adminService.getAllProducts();
     res.render("adminCreateOffer", { data: productData });
   } catch (error) {
-    cres.render("error", {
+    console.error("Error in renderCreateOffer:", error);
+    res.render("error", {
       message: "Something went wrong in loading creating offer form",
     });
   }
@@ -666,55 +475,26 @@ const rendercreateOffer = async (req, res) => {
 
 const createOffer = async (req, res) => {
   try {
-    console.log(req.body);
-    const offerName = req.body.name;
-    const offerPercentage = parseInt(req.body.percentage, 10);
-    const product = req.body.product;
-    if (!offerName || !offerPercentage || !product) {
-      return res.status(400).send("Missing required fields");
+    const result = await adminService.createNewOffer(req.body);
+
+    if (result.exists) {
+      return res.redirect("/createOffer"); // If offer already exists
     }
-    const lowerOfferName = offerName.toLowerCase();
-    const offerExist = await Offer.findOne({ name: lowerOfferName });
-    if (!offerExist) {
-      const existingProduct = await Product.findById({ _id: product });
-      const originalProductPrice = existingProduct.offerprice;
-      const newPrice = Math.round(
-        originalProductPrice *
-          ((100 - (existingProduct.offerPercentage + offerPercentage)) / 100)
-      );
-      await Product.findByIdAndUpdate(
-        { _id: product },
-        { $set: { offerprice: newPrice } }
-      );
-      await Product.findByIdAndUpdate(
-        { _id: product },
-        {
-          $set: {
-            offerPercentage: existingProduct.offerPercentage + offerPercentage,
-          },
-        }
-      );
-      const newOffer = new Offer({
-        name: offerName,
-        percentage: offerPercentage,
-        product: product,
-      });
-      await newOffer.save();
-      res.redirect("/offerlist");
-    } else {
-      res.redirect("/createOffer");
-    }
+
+    res.redirect("/offerlist");
   } catch (error) {
+    console.error("Error in createOffer:", error);
     res.render("error", { message: "Something went wrong creating offer" });
   }
 };
 const deleteOffer = async (req, res) => {
   try {
-    await Offer.findByIdAndDelete(req.params.id);
+    await adminService.deleteOfferById(req.params.id);
     res
       .status(200)
       .json({ success: true, message: "Offer deleted successfully" });
   } catch (error) {
+    console.error("Error in deleteOffer:", error);
     res.render("error", { message: "Something went wrong in deleting offer" });
   }
 };
@@ -724,10 +504,8 @@ const deleteOffer = async (req, res) => {
 =====================================*/
 const categoryOfferCreate = async (req, res) => {
   try {
-    const categoryData = await Categories.find();
-    res.render("adminCategoryOfferCreate", {
-      data: categoryData,
-    });
+    const categoryData = await adminService.getAllCategories();
+    res.render("adminCategoryOfferCreate", { data: categoryData });
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in loading category offer form",
@@ -736,104 +514,41 @@ const categoryOfferCreate = async (req, res) => {
 };
 const addCategoryOffer = async (req, res) => {
   try {
-    const offerName = req.body.name;
-    const offerPercentage = parseInt(req.body.percentage, 10);
-    const category = req.body.category;
-
-    if (!offerName || !offerPercentage || !category) {
+    const { name, percentage, category } = req.body;
+    if (!name || !percentage || !category) {
       return res.status(400).send("Missing required fields");
     }
 
-    const lowerOfferName = offerName.toLowerCase();
-    const offerExist = await Offer.findOne({ name: lowerOfferName });
+    const offer = await adminService.createCategoryOffer(
+      name,
+      parseInt(percentage, 10),
+      category
+    );
 
-    if (!offerExist) {
-      const products = await Product.find({ category: category });
+    if (!offer) return res.redirect("/categoryOfferCreate");
 
-      products.forEach((product) => {
-        const currentOfferPercentage = product.offerPercentage || 0;
-        const currentOfferPrice = product.offerPrice || product.price;
-
-        if (isNaN(currentOfferPrice)) {
-          console.error(`Invalid offerPrice for product ${product._id}`);
-          return;
-        }
-
-        product.offerPercentage = currentOfferPercentage + offerPercentage;
-
-        const newPrice = Math.round(
-          currentOfferPrice -
-            (currentOfferPrice * product.offerPercentage) / 100
-        );
-
-        if (isNaN(newPrice)) {
-          console.error(
-            `Calculated new price is invalid for product ${product._id}`
-          );
-          return;
-        }
-
-        product.offerprice = newPrice;
-        product.save();
-      });
-
-      const newOffer = new Offer({
-        name: offerName,
-        percentage: offerPercentage,
-        category: category,
-      });
-      await newOffer.save();
-
-      res.redirect("/offerlist");
-    } else {
-      res.redirect("/categoryOfferCreate");
-    }
+    res.redirect("/offerlist");
   } catch (error) {
     res.render("error", {
       message: "Something went wrong in adding category offer",
     });
   }
 };
-
 const deleteCategoryOffer = async (req, res) => {
   try {
-    const offerDoc = await Offer.findById(req.params.id);
-
-    if (!offerDoc) {
+    const deleted = await adminService.deleteCategoryOfferById(req.params.id);
+    if (!deleted)
       return res
         .status(404)
         .json({ success: false, message: "Offer not found" });
-    }
-
-    const products = await Product.find({ category: offerDoc.category });
-
-    products.forEach((product) => {
-      const currentOffer = product.offerPercentage || 0;
-      const newOffer = currentOffer - offerDoc.percentage;
-      const offerPrice = product.offerPrice || product.price;
-
-      if (isNaN(offerPrice) || isNaN(newOffer)) {
-        throw new Error("Invalid offer or price values");
-      }
-
-      const newPrice = ((100 - newOffer) * offerPrice) / 100;
-
-      if (isNaN(newPrice)) {
-        throw new Error("Calculated new price is invalid");
-      }
-
-      product.price = newPrice;
-      product.offerPercentage = newOffer;
-      product.save();
-    });
-
-    await Offer.deleteOne({ _id: req.params.id });
 
     res
       .status(200)
       .json({ success: true, message: "Offer deleted successfully" });
   } catch (error) {
-    res.render("error", { message: "Something went wrong in deleting offer" });
+    res.render("error", {
+      message: "Something went wrong in deleting offer",
+    });
   }
 };
 
@@ -886,7 +601,8 @@ const dailySales = async (req, res) => {
     const ejsData = ejs.render(htmlString, orderData);
     await createDailySales(ejsData);
     await createDailySalesExcel(todayOrders);
-    const pdfFilePath = path.resolve(__dirname, "DailySalesReport.pdf");
+
+    const pdfFilePath = path.resolve(process.cwd(), "DailySalesReport.pdf");
     const pdfData = fs.readFileSync(pdfFilePath);
     const excelFilePath = "DailySalesReport.xlsx";
     const excelData = fs.readFileSync(excelFilePath);
@@ -923,7 +639,10 @@ const createDailySales = async (html) => {
   });
   const page = await browser.newPage();
   await page.setContent(html);
-  await page.pdf({ path: "DailySalesReport.pdf" });
+
+  await page.pdf({
+    path: path.resolve(process.cwd(), "DailySalesReport.pdf"),
+  });
   await browser.close();
 };
 
@@ -1019,7 +738,7 @@ const weeklySales = async (req, res) => {
     const ejsData = ejs.render(htmlString, orderData);
     await createWeeklySalesPdf(ejsData);
     await createWeeklySalesExcel(todaysOrders);
-    const pdfFilePath = path.resolve(__dirname, "WeeklySalesReport.pdf");
+    const pdfFilePath = path.resolve(process.cwd(), "WeeklySalesReport.pdf");
     const pdfData = fs.readFileSync(pdfFilePath);
 
     const excelFilePath = "WeeklySalesReport.xlsx";
@@ -1044,6 +763,7 @@ const weeklySales = async (req, res) => {
       res.send(pdfData);
     }
   } catch (error) {
+    console.log(error);
     res.render("error", {
       message: "Something went wrong in loading weekly sales",
     });
@@ -1057,7 +777,10 @@ const createWeeklySalesPdf = async (html) => {
   });
   const page = await browser.newPage();
   await page.setContent(html);
-  await page.pdf({ path: "WeeklySalesReport.pdf" });
+  await page.pdf({
+    path: path.resolve(process.cwd(), "WeeklySalesReport.pdf"),
+  });
+
   await browser.close();
 };
 const createWeeklySalesExcel = async (orders) => {
@@ -1150,7 +873,7 @@ const yearlySales = async (req, res) => {
     const ejsData = ejs.render(htmlString, orderData);
     await createYearlySalesPdf(ejsData);
     await createYearlySalesExcel(orderData.todaysOrders);
-    const pdfFilePath = "YearlySalesReport.pdf";
+    const pdfFilePath = path.resolve(process.cwd(), "YearlySalesReport.pdf");
     const pdfData = fs.readFileSync(pdfFilePath);
 
     const excelFilePath = "YearlySalesReport.xlsx";
@@ -1187,7 +910,11 @@ const createYearlySalesPdf = async (html) => {
   });
   const page = await browser.newPage();
   await page.setContent(html);
-  await page.pdf({ path: "YearlySalesReport.pdf" });
+
+  await page.pdf({
+    path: path.resolve(process.cwd(), "YearlySalesReport.pdf"),
+  });
+
   await browser.close();
 };
 
@@ -1662,6 +1389,5 @@ module.exports = {
   updateDashboard,
   generateInvoice,
   ledger,
-  upload,
   logout,
 };

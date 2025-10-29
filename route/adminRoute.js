@@ -4,6 +4,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const adminController = require("../controllers/adminController");
 const connectToDatabase = require("../db");
+const { upload } = require("../utils/multer");
 connectToDatabase();
 
 router.get("/dashboard", auth.adminLogin, adminController.dashboardload);
@@ -14,8 +15,8 @@ router.get(
 );
 router.post("/loginAdmin", adminController.admin);
 router.get("/userManagement", auth.adminLogin, adminController.userList);
-router.get("/blockUser", auth.adminLogin, adminController.blockUser);
-router.get("/unblockUser", auth.adminLogin, adminController.unBlockUser);
+router.post("/blockUser", auth.adminLogin, adminController.blockUser);
+router.post("/unblockUser", auth.adminLogin, adminController.unBlockUser);
 router.get(
   "/categoryManagement",
   auth.adminLogin,
@@ -35,14 +36,14 @@ router.get("/addProduct", auth.adminLogin, adminController.renderAddProduct);
 router.post(
   "/addProduct",
   auth.adminLogin,
-  adminController.upload.array("images", 5),
+  upload.array("images", 5),
   adminController.addProduct
 );
 router.get("/editProduct", auth.adminLogin, adminController.renderEditProduct);
 router.post(
   "/editProduct",
   auth.adminLogin,
-  adminController.upload.array("images", 5),
+  upload.array("images", 5),
   adminController.editProduct
 );
 router.delete("/deleteImage", auth.adminLogin, adminController.deleteImage);

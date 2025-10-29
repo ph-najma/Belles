@@ -1,31 +1,82 @@
 <%- include('adminHeader') %>
+
 <div style="padding: 100px">
-  <table class="table table-hover">
+  <table class="table table-hover" id="userTable">
     <thead>
       <tr>
-        <th scope="col">#</th>
-        <th scope="col">Name</th>
-        <th scope="col">Sname</th>
-        <th scope="col">Email</th>
-        <th scope="col">Actions</th>
+        <th>#</th>
+        <th>Name</th>
+        <th>Sname</th>
+        <th>Email</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <% if (users.length > 0) { %> <% for (let i = 0; i < users.length; i++) {
       %>
-      <tr>
-        <th scope="row"><%= i + 1 %></th>
+      <tr id="user-<%= users[i]._id %>">
+        <td><%= i + 1 %></td>
         <td><%= users[i].name %></td>
         <td><%= users[i].sname %></td>
         <td><%= users[i].email %></td>
-        <% if (users[i].is_blocked) { %>
-        <td><a href="/unblockUser?id=<%= users[i]._id %>">Unblock</a></td>
-        <% } else { %>
-        <td><a href="/blockUser?id=<%= users[i]._id %>">Block</a></td>
-        <% } %>
+        <td>
+          <% if (users[i].is_blocked) { %>
+          <button
+            class="btn btn-success"
+            onclick="toggleUser('<%= users[i]._id %>', false)"
+          >
+            Unblock
+          </button>
+          <% } else { %>
+          <button
+            class="btn btn-danger"
+            onclick="toggleUser('<%= users[i]._id %>', true)"
+          >
+            Block
+          </button>
+          <% } %>
+        </td>
       </tr>
       <% } %> <% } %>
     </tbody>
   </table>
 </div>
+
+<script>
+  async function toggleUser(userId, block) {
+    try {
+      const url = block ? "/blockUser" : "/unblockUser";
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update the button without reloading
+        const row = document.getElementById(`user-${userId}`);
+        const buttonCell = row.querySelector("td:last-child");
+        if (block) {
+          buttonCell.innerHTML = `
+            <button class="btn btn-success" onclick="toggleUser('${userId}', false)">Unblock</button>
+          `;
+        } else {
+          buttonCell.innerHTML = `
+            <button class="btn btn-danger" onclick="toggleUser('${userId}', true)">Block</button>
+          `;
+        }
+      } else {
+        alert("Action failed: " + result.message);
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Something went wrong.");
+    }
+  }
+</script>
+
 <%- include('adminFooter') %>
