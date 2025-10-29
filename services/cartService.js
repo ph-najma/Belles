@@ -208,7 +208,7 @@ const loadCheckoutData = async (userId, pendingOrder) => {
     };
   } else {
     const cartData = await Cart.aggregate([
-      { $match: { userId } },
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       { $unwind: "$item" },
       {
         $lookup: {
@@ -228,9 +228,21 @@ const loadCheckoutData = async (userId, pendingOrder) => {
         },
       },
       { $unwind: "$item.product.category" },
+      {
+        $project: {
+          userId: 1,
+          "item.product": 1,
+          "item.quantity": 1,
+          "item.price": 1,
+          "item.size": 1,
+          shippingCharge: 1,
+          totalPrice: 1,
+          totalQty: 1,
+        },
+      },
     ]);
 
-    if (!cartData.length) return null;
+    // if (!cartData.length) return null;
 
     const totalPrice = cartData.reduce(
       (acc, cur) => acc + cur.item.product.price * cur.item.quantity,
@@ -240,13 +252,15 @@ const loadCheckoutData = async (userId, pendingOrder) => {
     const addressData = await Address.find({ userId, is_deleted: false }).sort({
       created_at: -1,
     });
+    const shippingCharge = cartData[0]?.shippingCharge ?? 0;
+
     return {
       user,
       coupon,
       addresses: addressData,
       items: cartData.map((cart) => cart.item),
       totalPrice,
-      shippingCharge: cartData[0].shippingCharge,
+      shippingCharge,
       isPending: false,
     };
   }

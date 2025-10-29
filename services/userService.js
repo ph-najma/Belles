@@ -15,7 +15,10 @@ const { generateReferralCode } = require("../utils/generateReferralCode.js");
 const { securePassword } = require("../utils/securePassword.js");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const Razorpay = require("razorpay");
 const ObjectId = mongoose.Types.ObjectId;
+const dotenv = require("dotenv");
+dotenv.config();
 
 const saltRounds = 10;
 
@@ -592,6 +595,10 @@ const cancelCouponSelectionService = async (userId, selectedCouponId) => {
     throw error;
   }
 };
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 const createRazorpayOrder = async (amount) => {
   try {
     const options = {

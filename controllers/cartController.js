@@ -73,10 +73,13 @@ const removeCartItem = async (req, res) => {
 const loadCheckOut = async (req, res) => {
   try {
     const userId = req.session.user._id;
+    console.log(userId);
     const checkoutData = await cartService.loadCheckoutData(
       userId,
       req.session.pendingOrder
     );
+
+    console.log(checkoutData, "from checkout");
 
     if (!checkoutData) return res.redirect("/cart");
 
