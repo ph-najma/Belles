@@ -777,9 +777,7 @@ const createWeeklySalesPdf = async (html) => {
   });
   const page = await browser.newPage();
   await page.setContent(html);
-  await page.pdf({
-    path: path.resolve(process.cwd(), "WeeklySalesReport.pdf"),
-  });
+  await page.pdf({ path: "/tmp/WeeklySalesReport.pdf" });
 
   await browser.close();
 };
