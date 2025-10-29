@@ -1,10 +1,12 @@
 // db.js - Database connection setup
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const connectToDatabase = async () => {
   try {
-    const mongoURI =
-      "mongodb+srv://phnajma786:.j7Dnq5XgGQAWhN@cluster0.viosua5.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0";
+    const mongoURI = process.env.mongoURI;
+
     await mongoose.connect(mongoURI, {});
     console.log("Connected to MongoDB");
   } catch (error) {
